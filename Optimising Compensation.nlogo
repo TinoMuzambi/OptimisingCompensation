@@ -11,13 +11,13 @@ employees-own [
   pref-role
   job-satisfaction
   my-employer
-
 ]
 employers-own [
   culture
   num-jobs-available
   workforce-needs
   num-employees
+  my-employees
 ]
 
 ; Set up routine.
@@ -29,22 +29,34 @@ to setup
     set shape "circle 2"
     set color white
     set num-employees random total-employees / num-employers
-    set size num-employees
     set num-jobs-available random 10
     set workforce-needs 0
     set culture "flexible"
+    set my-employees []
   ]
 
-  create-employees total-employees [
-    setxy random-xcor random-ycor
-    set shape "person business"
-    set color random color
-    set salary random 100000
-    set pref-role "developer"
-    set job-satisfaction 0
-    set pref-culture "flexible"
-    set my-employer one-of employers
-    move-to my-employer
+  let remaining-employees total-employees
+  let employer-index 0
+  foreach sort employers [
+    this-employer ->
+    let employer-employees min (list remaining-employees ceiling (total-employees / num-employers)) ; Distribute remaining employees evenly
+    set remaining-employees remaining-employees - employer-employees
+    create-employees employer-employees [
+      setxy random-xcor random-ycor
+      set shape "person business"
+      set color random color
+      set salary random 100000
+      set pref-role "developer"
+      set job-satisfaction 0
+      set pref-culture "flexible"
+      set my-employer this-employer
+      move-to this-employer
+      ask this-employer [
+        set my-employees fput myself my-employees ; Add this employee to the employer's list
+        set size length my-employees / 10
+      ]
+    ]
+    set employer-index employer-index + 1
   ]
 
   reset-ticks
@@ -92,7 +104,7 @@ total-employees
 total-employees
 0
 500
-60.0
+297.0
 1
 1
 NIL
