@@ -15,9 +15,20 @@ to setup
   create-employers num-employers [
     setxy random-xcor random-ycor
     set shape "circle"
-    set num-employees random total-employees / num-employers
+    set num-employees random total-employees / num-employers / 10
     set size num-employees
     set color random color
+    set num-jobs-available random 10
+    set workforce-needs 0
+    set culture "flexible"
+  ]
+
+  create-employees total-employees [
+    setxy random-xcor random-ycor
+    set shape "person"
+    set salary random 100000
+    set pref-role "developer"
+    set color random
     set num-jobs-available random 10
     set workforce-needs 0
     set culture "flexible"
@@ -83,7 +94,7 @@ num-employers
 num-employers
 0
 50
-20.0
+10.0
 1
 1
 NIL
