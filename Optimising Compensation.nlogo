@@ -1,12 +1,24 @@
 ; Employee Compensation Optimisation Simulation
 
 ; Define agents.
-breed [employees employee]
 breed [employers employer]
+breed [employees employee]
 
 ; Define agent attributes.
-employees-own [salary pref-culture pref-role job-satisfaction]
-employers-own [culture num-jobs-available workforce-needs num-employees]
+employees-own [
+  salary
+  pref-culture
+  pref-role
+  job-satisfaction
+  my-employer
+
+]
+employers-own [
+  culture
+  num-jobs-available
+  workforce-needs
+  num-employees
+]
 
 ; Set up routine.
 to setup
@@ -14,9 +26,9 @@ to setup
 
   create-employers num-employers [
     setxy random-xcor random-ycor
-    set shape "circle"
-    set color random color
-    set num-employees random total-employees / num-employers / 10
+    set shape "circle 2"
+    set color white
+    set num-employees random total-employees / num-employers
     set size num-employees
     set num-jobs-available random 10
     set workforce-needs 0
@@ -25,12 +37,14 @@ to setup
 
   create-employees total-employees [
     setxy random-xcor random-ycor
-    set shape "person"
+    set shape "person business"
     set color random color
     set salary random 100000
     set pref-role "developer"
     set job-satisfaction 0
     set pref-culture "flexible"
+    set my-employer one-of employers
+    move-to my-employer
   ]
 
   reset-ticks
@@ -78,7 +92,7 @@ total-employees
 total-employees
 0
 500
-500.0
+60.0
 1
 1
 NIL
@@ -220,6 +234,38 @@ Circle -7500403 true true 110 127 80
 Circle -7500403 true true 110 75 80
 Line -7500403 true 150 100 80 30
 Line -7500403 true 150 100 220 30
+
+building institution
+false
+0
+Rectangle -7500403 true true 0 60 300 270
+Rectangle -16777216 true false 130 196 168 256
+Rectangle -16777216 false false 0 255 300 270
+Polygon -7500403 true true 0 60 150 15 300 60
+Polygon -16777216 false false 0 60 150 15 300 60
+Circle -1 true false 135 26 30
+Circle -16777216 false false 135 25 30
+Rectangle -16777216 false false 0 60 300 75
+Rectangle -16777216 false false 218 75 255 90
+Rectangle -16777216 false false 218 240 255 255
+Rectangle -16777216 false false 224 90 249 240
+Rectangle -16777216 false false 45 75 82 90
+Rectangle -16777216 false false 45 240 82 255
+Rectangle -16777216 false false 51 90 76 240
+Rectangle -16777216 false false 90 240 127 255
+Rectangle -16777216 false false 90 75 127 90
+Rectangle -16777216 false false 96 90 121 240
+Rectangle -16777216 false false 179 90 204 240
+Rectangle -16777216 false false 173 75 210 90
+Rectangle -16777216 false false 173 240 210 255
+Rectangle -16777216 false false 269 90 294 240
+Rectangle -16777216 false false 263 75 300 90
+Rectangle -16777216 false false 263 240 300 255
+Rectangle -16777216 false false 0 240 37 255
+Rectangle -16777216 false false 6 90 31 240
+Rectangle -16777216 false false 0 75 37 90
+Line -16777216 false 112 260 184 260
+Line -16777216 false 105 265 196 265
 
 butterfly
 true
@@ -366,6 +412,23 @@ Polygon -7500403 true true 105 90 120 195 90 285 105 300 135 300 150 225 165 300
 Rectangle -7500403 true true 127 79 172 94
 Polygon -7500403 true true 195 90 240 150 225 180 165 105
 Polygon -7500403 true true 105 90 60 150 75 180 135 105
+
+person business
+false
+0
+Rectangle -1 true false 120 90 180 180
+Polygon -13345367 true false 135 90 150 105 135 180 150 195 165 180 150 105 165 90
+Polygon -7500403 true true 120 90 105 90 60 195 90 210 116 154 120 195 90 285 105 300 135 300 150 225 165 300 195 300 210 285 180 195 183 153 210 210 240 195 195 90 180 90 150 165
+Circle -7500403 true true 110 5 80
+Rectangle -7500403 true true 127 76 172 91
+Line -16777216 false 172 90 161 94
+Line -16777216 false 128 90 139 94
+Polygon -13345367 true false 195 225 195 300 270 270 270 195
+Rectangle -13791810 true false 180 225 195 300
+Polygon -14835848 true false 180 226 195 226 270 196 255 196
+Polygon -13345367 true false 209 202 209 216 244 202 243 188
+Line -16777216 false 180 90 150 165
+Line -16777216 false 120 90 150 165
 
 plant
 false
