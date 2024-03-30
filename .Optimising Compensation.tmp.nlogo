@@ -4,16 +4,29 @@
 breed [employees employee]
 breed [employers employer]
 
-; Define agent attributes
+; Define agent attributes.
 employees-own [salary pref-culture pref-role job-satisfaction]
-employers-own [culture num-jobs-available workforce-needs nu
+employers-own [culture num-jobs-available workforce-needs num-employees]
 
+; Set up routine.
 to setup
   clear-all
+
+  create-employers num-employers [
+    setxy random-xcor random-ycor
+    set shape "circle"
+    set num-employees random total-employees / num-employers
+    set size num-employees
+    set color random color
+    set num-jobs-available random 10
+    set workforce-needs 0
+    set culture "flexible"
+  ]
 
   reset-ticks
 end
 
+; Go routine.
 to go
 
   tick
@@ -51,11 +64,11 @@ SLIDER
 223
 204
 256
-initial-population
-initial-population
+total-employees
+total-employees
 0
 500
-100.0
+500.0
 1
 1
 NIL
@@ -66,8 +79,8 @@ SLIDER
 263
 204
 296
-num-companies
-num-companies
+num-employers
+num-employers
 0
 50
 20.0
