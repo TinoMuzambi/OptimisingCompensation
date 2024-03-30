@@ -16,7 +16,7 @@ employers-own [
   culture
   num-jobs-available
   workforce-needs
-  num-employees
+  capacity
   my-employees
 ]
 
@@ -28,7 +28,7 @@ to setup
     setxy random-xcor random-ycor
     set shape "circle 2"
     set color white
-    set num-employees random total-employees / num-employers
+    set capacity (random 96) + 5
     set num-jobs-available random 10
     set workforce-needs 0
     set culture "flexible"
@@ -39,7 +39,7 @@ to setup
   let employer-index 0
   foreach sort employers [
     this-employer ->
-    let employer-employees min (list remaining-employees ceiling (total-employees / num-employers)) ; Distribute remaining employees evenly
+    let employer-employees min (list (random remaining-employees + 10) [capacity] of this-employer)
     set remaining-employees remaining-employees - employer-employees
     create-employees employer-employees [
       setxy random-xcor random-ycor
@@ -104,7 +104,7 @@ total-employees
 total-employees
 0
 500
-297.0
+300.0
 1
 1
 NIL
