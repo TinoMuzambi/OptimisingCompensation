@@ -59,6 +59,8 @@ to setup
     set employer-index employer-index + 1
   ]
 
+  ; reverse sort-on [length my-employees] employers
+
   reset-ticks
 end
 
