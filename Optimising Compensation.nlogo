@@ -1,5 +1,14 @@
 ; Employee Compensation Optimisation Simulation
 
+globals [
+  grid-x-inc               ;; the amount of patches in between two roads in the x direction
+  grid-y-inc               ;; the amount of patches in between two roads in the y direction
+
+  ;; patch agentsets
+  intersections ;; agentset containing the patches that are intersections
+  roads         ;; agentset containing the patches that are roads
+]
+
 ; Define agents.
 breed [employers employer]
 breed [employees employee]
@@ -20,9 +29,18 @@ employers-own [
   my-employees
 ]
 
+patches-own [
+  intersection?   ;; true if the patch is at the intersection of two roads
+  my-row          ;; the row of the intersection counting from the upper left corner of the
+                  ;; world.  -1 for non-intersection patches.
+  my-column       ;; the column of the intersection counting from the upper left corner of the
+                  ;; world.  -1 for non-intersection patches.
+]
+
 ; Set up routine.
 to setup
   clear-all
+  setup-globals
 
   create-employers num-employers [
     setxy random-xcor random-ycor
@@ -64,6 +82,12 @@ to setup
   reset-ticks
 end
 
+;; Initialize the global variables to appropriate values
+to setup-globals
+  set grid-x-inc world-width / 4
+  set grid-y-inc world-height / 4
+end
+
 ; Go routine.
 to go
 
@@ -73,24 +97,24 @@ end
 GRAPHICS-WINDOW
 564
 8
-1001
-446
+905
+350
 -1
 -1
-13.0
+9.0
 1
-10
+12
 1
 1
 1
 0
-0
-0
 1
--16
-16
--16
-16
+1
+1
+-18
+18
+-18
+18
 0
 0
 1
