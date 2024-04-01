@@ -42,6 +42,8 @@ to setup
   clear-all
   setup-globals
 
+  setup-patches
+
   create-employers num-employers [
     setxy random-xcor random-ycor
     set shape "circle 2"
@@ -84,8 +86,44 @@ end
 
 ;; Initialize the global variables to appropriate values
 to setup-globals
-  set grid-x-inc world-width / 4
-  set grid-y-inc world-height / 4
+  set grid-x-inc world-width / ceiling sqrt num-employers
+  set grid-y-inc world-height / ceiling sqrt num-employers
+end
+
+;; Make the patches have appropriate colors, set up the roads and intersections agentsets,
+;; and initialize the traffic lights to one setting
+to setup-patches
+  ;; initialize the patch-owned variables and color the patches to a base-color
+  ask patches
+  [
+    set intersection? false
+    set my-row -1
+    set my-column -1
+    set pcolor brown + 3
+  ]
+
+  ;; initialize the global variables that hold patch agentsets
+  set roads patches with
+    [(floor((pxcor + max-pxcor - floor(grid-x-inc - 1)) mod grid-x-inc) = 0) or
+    (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
+  set intersections roads with
+    [(floor((pxcor + max-pxcor - floor(grid-x-inc - 1)) mod grid-x-inc) = 0) and
+    (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
+
+  ask roads [ set pcolor white ]
+  setup-intersections
+end
+
+;; Give the intersections appropriate values for the intersection?, my-row, and my-column
+;; patch variables.  Make all the traffic lights start off so that the lights are red
+;; horizontally and green vertically.
+to setup-intersections
+  ask intersections
+  [
+    set intersection? true
+    set my-row floor((pycor + max-pycor) / grid-y-inc)
+    set my-column floor((pxcor + max-pxcor) / grid-x-inc)
+  ]
 end
 
 ; Go routine.
