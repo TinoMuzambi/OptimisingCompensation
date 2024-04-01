@@ -132,11 +132,13 @@ to go
   ]
 
   ask employers [
-
+    eval-workforce-needs
   ]
 
   tick
 end
+
+;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to eval-job-satisfaction
   let salary-score ifelse-value (salary >= pref-salary) [0.33] [0]
@@ -161,7 +163,7 @@ to seek-job-negotiate
         set size length my-employees / 10
       ]
       ask old-employer [                                   ; Update old employer details.
-        set num-jobs-available num-jobs-available + 1
+;        set num-jobs-available num-jobs-available + 1
         set my-employees remove myself my-employees
       ]
 
@@ -180,6 +182,17 @@ to seek-job-negotiate
   eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
 end
 
+;;;;;;;;;;;;;;;;;;;;;; EMPLOYER ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to eval-workforce-needs
+  if workforce-needs > length my-employees [
+    if workforce-needs < capacity [
+      set num-jobs-available num-jobs-available + 1
+    ]
+  ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;; REPORTERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to-report sum-num-jobs-available
   report sum [num-jobs-available] of employers
@@ -236,7 +249,7 @@ num-employers
 num-employers
 0
 50
-10.0
+25.0
 1
 1
 NIL
@@ -302,7 +315,7 @@ annual-salary-increase
 annual-salary-increase
 0
 1
-0.0
+0.05
 0.01
 1
 NIL
@@ -317,7 +330,7 @@ salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.7
+0.15
 0.01
 1
 NIL
