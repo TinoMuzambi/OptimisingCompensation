@@ -49,7 +49,7 @@ to setup
     set shape "circle 2"
     set color brown
     set capacity (random 96) + 5
-    set num-jobs-available random 10
+    set num-jobs-available 0
     set workforce-needs random 100
     set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
@@ -131,6 +131,10 @@ to go
     ]
   ]
 
+  ask employers [
+
+  ]
+
   tick
 end
 
@@ -144,41 +148,48 @@ end
 
 
 to seek-job-negotiate
-  let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
-  let old-employer my-employer
+  if any? employers with [num-jobs-available > 0] [
+    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
+    let old-employer my-employer
 
-  let application-outcome random-float 1                 ; Simulate application process.
-  if-else application-outcome > 0.5 [                    ; Application successful.
-    set my-employer new-employer                         ; Update my employer.
-    ask new-employer [                                   ; Update new employer details.
-      set num-jobs-available num-jobs-available - 1
-      set my-employees fput myself my-employees
-      set size length my-employees / 10
-    ]
-    ask old-employer [                                   ; Update old employer details.
-      set num-jobs-available num-jobs-available + 1
-      set my-employees remove myself my-employees
-    ]
+    let application-outcome random-float 1                 ; Simulate application process.
+    if-else application-outcome > 0.5 [                    ; Application successful.
+      set my-employer new-employer                         ; Update my employer.
+      ask new-employer [                                   ; Update new employer details.
+        set num-jobs-available num-jobs-available - 1
+        set my-employees fput myself my-employees
+        set size length my-employees / 10
+      ]
+      ask old-employer [                                   ; Update old employer details.
+        set num-jobs-available num-jobs-available + 1
+        set my-employees remove myself my-employees
+      ]
 
-    set salary salary * (1 + salary-increase-changing-jobs) ; Update my salary.
-    set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
-    move-to new-employer
-  ] [
-    let negotiation-outcome random-float 1               ; Simulate negotiation process.
+      set salary salary * (1 + salary-increase-changing-jobs) ; Update my salary.
+      set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
+      move-to new-employer
+    ] [
+      let negotiation-outcome random-float 1               ; Simulate negotiation process.
 
-    if negotiation-outcome > 0.5 [                       ; Negotiation successful.
-     set salary salary * (1 + annual-salary-increase)    ; Update my salary.
+      if negotiation-outcome > 0.5 [                       ; Negotiation successful.
+        set salary salary * (1 + annual-salary-increase)    ; Update my salary.
+      ]
     ]
   ]
 
   eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
 end
+
+
+to-report sum-num-jobs-available
+  report sum [num-jobs-available] of employers
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-280
-32
-621
-374
+538
+8
+879
+350
 -1
 -1
 9.0
@@ -291,7 +302,7 @@ annual-salary-increase
 annual-salary-increase
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -306,17 +317,17 @@ salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.15
+0.7
 0.01
 1
 NIL
 HORIZONTAL
 
 PLOT
-44
-242
-244
-392
+328
+9
+528
+159
 Job Satisfaction
 NIL
 NIL
@@ -329,6 +340,17 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [job-satisfaction] of employees"
+
+MONITOR
+328
+165
+493
+210
+Number of Job Openings
+sum-num-jobs-available
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
