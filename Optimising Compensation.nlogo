@@ -15,6 +15,7 @@ breed [employees employee]
 ; Define agent attributes.
 employees-own [
   salary                 ; Monthly salary in Rands.
+  pref-salary            ; Preferred monthly salary in Rands.
   pref-culture           ; Preferred work culture.
   pref-role              ; Preferred role.
   role                   ; Current role.
@@ -65,6 +66,7 @@ to setup
       set shape "person business"
       set color random color
       set salary random 100000
+      set pref-salary random 100000
       set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
       set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
       set job-satisfaction 0
@@ -79,13 +81,13 @@ to setup
   ]
 
   ; Layout employers by size.
-  let sorted-employers reverse sort-on [length my-employees] employers
-  let sorted-employers-agentset (turtle-set sorted-employers)
-  ask sorted-employers-agentset [
-    let i who / size
-    let j (who + 1) mod size
-    setxy (-14 + (j * 9)) (14 - (i * 9))
-  ]
+;  let sorted-employers reverse sort-on [length my-employees] employers
+;  let sorted-employers-agentset (turtle-set sorted-employers)
+;  ask sorted-employers-agentset [
+;    let i who / size
+;    let j (who + 1) mod size
+;    setxy (-14 + (j * 9)) (14 - (i * 9))
+;  ]
 
   ; Move employees to their employers.
   ask employees [
@@ -122,14 +124,33 @@ end
 ; Go routine.
 to go
 
+  ask employees [
+    eval-job-satisfaction
+    if job-satisfaction < 0.5 [
+     seek-job
+    ]
+  ]
+
   tick
+end
+
+to eval-job-satisfaction
+  let salary-score ifelse-value (salary >= pref-salary) [0.33] [0]
+  let role-score ifelse-value (role = pref-role) [0.33] [0]
+  let culture-score ifelse-value ([culture] of my-employer = pref-culture) [0.33] [0]
+
+  set job-satisfaction salary-score + role-score + culture-score
+end
+
+to seek-job
+
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-564
-8
-905
-350
+280
+32
+621
+374
 -1
 -1
 9.0
@@ -139,8 +160,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -18
 18
