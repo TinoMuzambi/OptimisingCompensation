@@ -1,11 +1,11 @@
 ; Employee Compensation Optimisation Simulation
 
+; Define global variables.
 globals [
-  grid-x-inc               ;; the amount of patches in between two roads in the x direction
-  grid-y-inc               ;; the amount of patches in between two roads in the y direction
+  grid-x-inc    ; The amount of patches in between two roads in the x direction.
+  grid-y-inc    ; The amount of patches in between two roads in the y direction.
 
-  ;; patch agentsets
-  roads         ;; agentset containing the patches that are roads
+  roads         ; Agentset containing the patches that are roads.
 ]
 
 ; Define agents.
@@ -14,27 +14,25 @@ breed [employees employee]
 
 ; Define agent attributes.
 employees-own [
-  salary
-  pref-culture
-  pref-role
-  role
-  job-satisfaction
-  my-employer
+  salary                 ; Monthly salary in Rands.
+  pref-culture           ; Preferred work culture.
+  pref-role              ; Preferred role.
+  role                   ; Current role.
+  job-satisfaction       ; Job satisfaction based on culture, role and salary.
+  my-employer            ; Current employer.
 ]
 
 employers-own [
-  culture
-  num-jobs-available
-  workforce-needs
-  capacity
-  my-employees
+  culture                ; Work culture.
+  num-jobs-available     ; Number of job openings currently available.
+  workforce-needs        ; Number of employees needed to fulfil company needs.
+  capacity               ; Total number of employees company can have.
+  my-employees           ; Agentset of employees.
 ]
 
 patches-own [
-  my-row          ;; the row of the intersection counting from the upper left corner of the
-                  ;; world.  -1 for non-intersection patches.
-  my-column       ;; the column of the intersection counting from the upper left corner of the
-                  ;; world.  -1 for non-intersection patches.
+  my-row                 ; The row of the intersection counting from the upper left corner of the world.
+  my-column              ; The column of the intersection counting from the upper left corner of the world.
 ]
 
 ; Set up routine.
@@ -44,6 +42,7 @@ to setup
 
   setup-patches
 
+  ; Create employers
   create-employers num-employers [
     setxy random-xcor random-ycor
     set shape "circle 2"
@@ -55,6 +54,7 @@ to setup
     set my-employees []
   ]
 
+  ; Create and allocate employees to employers
   let remaining-employees total-employees
   let employer-index 0
   foreach sort employers [
@@ -78,6 +78,7 @@ to setup
     set employer-index employer-index + 1
   ]
 
+  ; Layout employers by size.
   let sorted-employers reverse sort-on [length my-employees] employers
   let sorted-employers-agentset (turtle-set sorted-employers)
   ask sorted-employers-agentset [
@@ -86,6 +87,7 @@ to setup
     setxy (-14 + (j * 9)) (14 - (i * 9))
   ]
 
+  ; Move employees to their employers.
   ask employees [
     move-to my-employer
   ]
@@ -93,16 +95,15 @@ to setup
   reset-ticks
 end
 
-;; Initialize the global variables to appropriate values
+; Initialise the global variables to appropriate values.
 to setup-globals
   set grid-x-inc world-width / ceiling sqrt num-employers
   set grid-y-inc world-height / ceiling sqrt num-employers
 end
 
-;; Make the patches have appropriate colors, set up the roads and intersections agentsets,
-;; and initialize the traffic lights to one setting
+; Make the patches have appropriate colors.
 to setup-patches
-  ;; initialize the patch-owned variables and color the patches to a base-color
+  ; Initialise the patch-owned variables and color the patches to a base-color.
   ask patches
   [
     set my-row -1
@@ -110,13 +111,12 @@ to setup-patches
     set pcolor brown + 3
   ]
 
-  ;; initialize the global variables that hold patch agentsets
+  ; Initialise the global variables that hold patch agentsets.
   set roads patches with
     [(floor((pxcor + max-pxcor - floor(grid-x-inc - 1)) mod grid-x-inc) = 0) or
     (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
 
   ask roads [ set pcolor white ]
-;  setup-intersections
 end
 
 ; Go routine.
