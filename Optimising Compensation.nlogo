@@ -127,7 +127,7 @@ to go
   ask employees [
     eval-job-satisfaction
     if job-satisfaction < 0.5 [
-     seek-job
+     seek-job-negotiate
     ]
   ]
 
@@ -142,8 +142,36 @@ to eval-job-satisfaction
   set job-satisfaction salary-score + role-score + culture-score
 end
 
-to seek-job
 
+to seek-job-negotiate
+  let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
+  let old-employer my-employer
+
+  let application-outcome random-float 1                 ; Simulate application process.
+  if-else application-outcome > 0.5 [                    ; Application successful.
+    set my-employer new-employer                         ; Update my employer.
+    ask new-employer [                                   ; Update new employer details.
+      set num-jobs-available num-jobs-available - 1
+      set my-employees fput myself my-employees
+      set size length my-employees / 10
+    ]
+    ask old-employer [                                   ; Update old employer details.
+      set num-jobs-available num-jobs-available + 1
+      set my-employees remove myself my-employees
+    ]
+
+    set salary salary * (1 + salary-increase-changing-jobs) ; Update my salary.
+    set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
+    move-to new-employer
+  ] [
+    let negotiation-outcome random-float 1               ; Simulate negotiation process.
+
+    if negotiation-outcome > 0.5 [                       ; Negotiation successful.
+     set salary salary * (1 + annual-salary-increase)    ; Update my salary.
+    ]
+  ]
+
+  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -174,10 +202,10 @@ ticks
 30.0
 
 SLIDER
-31
-223
-204
-256
+13
+74
+186
+107
 total-employees
 total-employees
 0
@@ -189,10 +217,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-31
-263
-204
-296
+13
+110
+186
+143
 num-employers
 num-employers
 0
@@ -204,10 +232,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-32
-31
-99
-65
+13
+33
+80
+67
 Setup
 setup
 NIL
@@ -221,10 +249,10 @@ NIL
 1
 
 BUTTON
-103
-32
-167
-66
+84
+34
+148
+68
 Step
 go
 NIL
@@ -238,10 +266,10 @@ NIL
 1
 
 BUTTON
-170
-33
-234
-67
+152
+34
+216
+68
 Go
 go
 T
@@ -253,6 +281,54 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+13
+148
+211
+181
+annual-salary-increase
+annual-salary-increase
+0
+1
+0.05
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+185
+261
+218
+salary-increase-changing-jobs
+salary-increase-changing-jobs
+0
+1
+0.15
+0.01
+1
+NIL
+HORIZONTAL
+
+PLOT
+44
+242
+244
+392
+Job Satisfaction
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [job-satisfaction] of employees"
 
 @#$#@#$#@
 ## WHAT IS IT?
