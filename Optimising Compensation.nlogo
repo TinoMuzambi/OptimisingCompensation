@@ -5,7 +5,6 @@ globals [
   grid-y-inc               ;; the amount of patches in between two roads in the y direction
 
   ;; patch agentsets
-  intersections ;; agentset containing the patches that are intersections
   roads         ;; agentset containing the patches that are roads
 ]
 
@@ -18,9 +17,11 @@ employees-own [
   salary
   pref-culture
   pref-role
+  role
   job-satisfaction
   my-employer
 ]
+
 employers-own [
   culture
   num-jobs-available
@@ -30,7 +31,6 @@ employers-own [
 ]
 
 patches-own [
-  intersection?   ;; true if the patch is at the intersection of two roads
   my-row          ;; the row of the intersection counting from the upper left corner of the
                   ;; world.  -1 for non-intersection patches.
   my-column       ;; the column of the intersection counting from the upper left corner of the
@@ -47,11 +47,11 @@ to setup
   create-employers num-employers [
     setxy random-xcor random-ycor
     set shape "circle 2"
-    set color white
+    set color brown
     set capacity (random 96) + 5
     set num-jobs-available random 10
-    set workforce-needs 0
-    set culture "flexible"
+    set workforce-needs random 100
+    set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
   ]
 
@@ -62,15 +62,14 @@ to setup
     let employer-employees min (list (random remaining-employees + 10) [capacity] of this-employer)
     set remaining-employees remaining-employees - employer-employees
     create-employees employer-employees [
-      setxy random-xcor random-ycor
       set shape "person business"
       set color random color
       set salary random 100000
-      set pref-role "developer"
+      set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
+      set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
       set job-satisfaction 0
-      set pref-culture "flexible"
+      set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
       set my-employer this-employer
-      move-to this-employer
       ask this-employer [
         set my-employees fput myself my-employees ; Add this employee to the employer's list
         set size length my-employees / 10
@@ -79,7 +78,17 @@ to setup
     set employer-index employer-index + 1
   ]
 
-  ; reverse sort-on [length my-employees] employers
+  let sorted-employers reverse sort-on [length my-employees] employers
+  let sorted-employers-agentset (turtle-set sorted-employers)
+  ask sorted-employers-agentset [
+    let i who / size
+    let j (who + 1) mod size
+    setxy (-14 + (j * 9)) (14 - (i * 9))
+  ]
+
+  ask employees [
+    move-to my-employer
+  ]
 
   reset-ticks
 end
@@ -96,7 +105,6 @@ to setup-patches
   ;; initialize the patch-owned variables and color the patches to a base-color
   ask patches
   [
-    set intersection? false
     set my-row -1
     set my-column -1
     set pcolor brown + 3
@@ -106,24 +114,9 @@ to setup-patches
   set roads patches with
     [(floor((pxcor + max-pxcor - floor(grid-x-inc - 1)) mod grid-x-inc) = 0) or
     (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
-  set intersections roads with
-    [(floor((pxcor + max-pxcor - floor(grid-x-inc - 1)) mod grid-x-inc) = 0) and
-    (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
 
   ask roads [ set pcolor white ]
-  setup-intersections
-end
-
-;; Give the intersections appropriate values for the intersection?, my-row, and my-column
-;; patch variables.  Make all the traffic lights start off so that the lights are red
-;; horizontally and green vertically.
-to setup-intersections
-  ask intersections
-  [
-    set intersection? true
-    set my-row floor((pycor + max-pycor) / grid-y-inc)
-    set my-column floor((pxcor + max-pxcor) / grid-x-inc)
-  ]
+;  setup-intersections
 end
 
 ; Go routine.
