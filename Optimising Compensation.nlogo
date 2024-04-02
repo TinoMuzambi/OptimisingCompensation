@@ -65,8 +65,8 @@ to setup
     create-employees employer-employees [
       set shape "person business"
       set color random color
-      set salary random 100000
-      set pref-salary random 100000
+      set salary random-normal 50000 25000
+      set pref-salary random-normal 50000 25000
       set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
       set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
       set job-satisfaction 0
@@ -226,15 +226,15 @@ ticks
 30.0
 
 SLIDER
-13
-74
-186
-107
+5
+48
+178
+81
 total-employees
 total-employees
 0
 500
-300.0
+400.0
 1
 1
 NIL
@@ -249,7 +249,7 @@ num-employers
 num-employers
 0
 50
-25.0
+10.0
 1
 1
 NIL
@@ -273,10 +273,10 @@ NIL
 1
 
 BUTTON
-84
-34
-148
-68
+76
+7
+140
+41
 Step
 go
 NIL
