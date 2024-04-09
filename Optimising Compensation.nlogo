@@ -50,7 +50,7 @@ to setup
     set color brown
     set capacity (random 96) + 5
     set num-jobs-available 0
-    set workforce-needs random 100
+    set workforce-needs random 20
     set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
   ]
@@ -124,15 +124,15 @@ end
 ; Go routine.
 to go
 
+  ask employers [
+    eval-workforce-needs
+  ]
+
   ask employees [
     eval-job-satisfaction
     if job-satisfaction < 0.5 [
      seek-job-negotiate
     ]
-  ]
-
-  ask employers [
-    eval-workforce-needs
   ]
 
   tick
@@ -163,7 +163,7 @@ to seek-job-negotiate
         set size length my-employees / 10
       ]
       ask old-employer [                                   ; Update old employer details.
-;        set num-jobs-available num-jobs-available + 1
+        set num-jobs-available num-jobs-available + 1
         set my-employees remove myself my-employees
       ]
 
@@ -186,7 +186,7 @@ end
 
 to eval-workforce-needs
   if workforce-needs > length my-employees [
-    if workforce-needs < capacity [
+    if length my-employees < capacity [
       set num-jobs-available num-jobs-available + 1
     ]
   ]
@@ -234,17 +234,17 @@ total-employees
 total-employees
 0
 500
-400.0
+202.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-13
-110
-186
-143
+5
+84
+178
+117
 num-employers
 num-employers
 0
@@ -256,10 +256,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-13
-33
-80
-67
+5
+9
+72
+43
 Setup
 setup
 NIL
@@ -290,10 +290,10 @@ NIL
 1
 
 BUTTON
-152
-34
-216
-68
+145
+9
+209
+43
 Go
 go
 T
@@ -307,10 +307,10 @@ NIL
 1
 
 SLIDER
-13
-148
-211
-181
+5
+120
+203
+153
 annual-salary-increase
 annual-salary-increase
 0
@@ -322,10 +322,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-185
-261
-218
+5
+156
+253
+189
 salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
