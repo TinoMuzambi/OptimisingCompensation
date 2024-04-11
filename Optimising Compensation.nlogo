@@ -54,6 +54,7 @@ to setup
     set workforce-needs random 20
     set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
+    set size 1
 
     ; Position the employer in a grid in the top half
     let row floor (employer-num / ceiling (sqrt num-employers))
@@ -70,10 +71,8 @@ to setup
   create-employees total-employees [
     set shape "person business"
     set color random color
-    set salary random-normal 50000 25000
     set pref-salary random-normal 50000 25000
     set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
-    set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
     set job-satisfaction 0
     set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
 
@@ -94,57 +93,22 @@ to go
   ]
 
   ask employees [
-    eval-job-satisfaction
-    if job-satisfaction < 0.5 [
-     seek-job-negotiate
+    if-else my-employer = 0 [ ; If unemployed
+      seek-job
+    ] [
+      if job-satisfaction < 0.5 [
+        let application-outcome random-float 1                 ; Simulate application process.
+        if-else application-outcome > 0.5 [                    ; Application successful.
+          seek-job
+        ] [
+         negotiate
+        ]
+      ]
     ]
+
   ]
 
   tick
-end
-
-;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to eval-job-satisfaction
-  let salary-score ifelse-value (salary >= pref-salary) [0.33] [0]
-  let role-score ifelse-value (role = pref-role) [0.33] [0]
-  let culture-score ifelse-value ([culture] of my-employer = pref-culture) [0.33] [0]
-
-  set job-satisfaction salary-score + role-score + culture-score
-end
-
-
-to seek-job-negotiate
-  if any? employers with [num-jobs-available > 0] [
-    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
-    let old-employer my-employer
-
-    let application-outcome random-float 1                 ; Simulate application process.
-    if-else application-outcome > 0.5 [                    ; Application successful.
-      set my-employer new-employer                         ; Update my employer.
-      ask new-employer [                                   ; Update new employer details.
-        set num-jobs-available num-jobs-available - 1
-        set my-employees fput myself my-employees
-        set size length my-employees / 10
-      ]
-      ask old-employer [                                   ; Update old employer details.
-        set num-jobs-available num-jobs-available + 1
-        set my-employees remove myself my-employees
-      ]
-
-      set salary salary * (1 + salary-increase-changing-jobs) ; Update my salary.
-      set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
-      move-to new-employer
-    ] [
-      let negotiation-outcome random-float 1               ; Simulate negotiation process.
-
-      if negotiation-outcome > 0.5 [                       ; Negotiation successful.
-        set salary salary * (1 + annual-salary-increase)    ; Update my salary.
-      ]
-    ]
-  ]
-
-  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
 end
 
 ;;;;;;;;;;;;;;;;;;;;;; EMPLOYER ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -152,9 +116,66 @@ end
 to eval-workforce-needs
   if workforce-needs > length my-employees [
     if length my-employees < capacity [
-      set num-jobs-available num-jobs-available + 1
+      set num-jobs-available workforce-needs - length my-employees
     ]
   ]
+  set size length my-employees / 4
+end
+
+;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to eval-job-satisfaction
+  if-else my-employer = 0 [
+    set job-satisfaction 0
+  ] [
+    let salary-score ifelse-value (salary >= pref-salary) [0.33] [0]
+    let role-score ifelse-value (role = pref-role) [0.33] [0]
+    let culture-score ifelse-value ([culture] of my-employer = pref-culture) [0.33] [0]
+
+    set job-satisfaction salary-score + role-score + culture-score
+  ]
+end
+
+
+to seek-job
+  if any? employers with [num-jobs-available > 0] [
+    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
+    let old-employer my-employer
+
+
+    set my-employer new-employer                         ; Update my employer.
+    ask new-employer [                                   ; Update new employer details.
+      set num-jobs-available num-jobs-available - 1
+      set my-employees fput myself my-employees
+      set size length my-employees / 10
+    ]
+    if old-employer != 0 [
+      ask old-employer [                                   ; Update old employer details.
+        set num-jobs-available num-jobs-available + 1
+        set my-employees remove myself my-employees
+      ]
+    ]
+
+    if-else salary = 0 [
+     set salary random-normal 50000 25000
+    ] [
+      set salary salary * (1 + salary-increase-changing-jobs) ; Update my salary.
+    ]
+    set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
+    move-to new-employer
+  ]
+
+  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
+end
+
+to negotiate
+  let negotiation-outcome random-float 1               ; Simulate negotiation process.
+
+  if negotiation-outcome > 0.5 [                       ; Negotiation successful.
+    set salary salary * (1 + annual-salary-increase)    ; Update my salary.
+  ]
+
+  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;; REPORTERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -214,7 +235,7 @@ num-employers
 num-employers
 0
 50
-50.0
+12.0
 1
 1
 NIL
