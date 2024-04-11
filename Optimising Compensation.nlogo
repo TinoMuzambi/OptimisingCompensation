@@ -2,10 +2,7 @@
 
 ; Define global variables.
 globals [
-  grid-x-inc    ; The amount of patches in between two roads in the x direction.
-  grid-y-inc    ; The amount of patches in between two roads in the y direction.
 
-  roads         ; Agentset containing the patches that are roads.
 ]
 
 ; Define agents.
@@ -32,93 +29,61 @@ employers-own [
 ]
 
 patches-own [
-  my-row                 ; The row of the intersection counting from the upper left corner of the world.
-  my-column              ; The column of the intersection counting from the upper left corner of the world.
+
 ]
 
 ; Set up routine.
 to setup
   clear-all
-  setup-globals
 
-  setup-patches
+  ; Set the dimensions of the world
+  let custom-world-width total-employees / 4
+  let custom-world-height total-employees / 4
 
-  ; Create employers
+  ; Resize the world
+  resize-world (-1 * custom-world-width / 2) (custom-world-width / 2) (-1 * custom-world-height / 2) (custom-world-height / 2)
+
+  ; Create employers and position them in a grid in the top half
+  let employer-spacing (max-pycor / 2) / ceiling (sqrt num-employers)
+  let employer-num 0
   create-employers num-employers [
-    setxy random-xcor random-ycor
     set shape "circle 2"
-    set color brown
+    set color yellow
     set capacity (random 96) + 5
     set num-jobs-available 0
     set workforce-needs random 20
     set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
+
+    ; Position the employer in a grid in the top half
+    let row floor (employer-num / ceiling (sqrt num-employers))
+    let col employer-num mod ceiling (sqrt num-employers)
+    let x-pos (col * employer-spacing) - (max-pxcor / 2) + (employer-spacing / 2)
+    let y-pos (max-pycor / 2) - (row * employer-spacing) - (employer-spacing / 2)
+    setxy x-pos y-pos
+
+    set employer-num employer-num + 1
   ]
 
   ; Create and allocate employees to employers
-  let remaining-employees total-employees
-  let employer-index 0
-  foreach sort employers [
-    this-employer ->
-    let employer-employees min (list (random remaining-employees + 10) [capacity] of this-employer)
-    set remaining-employees remaining-employees - employer-employees
-    create-employees employer-employees [
-      set shape "person business"
-      set color random color
-      set salary random-normal 50000 25000
-      set pref-salary random-normal 50000 25000
-      set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
-      set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
-      set job-satisfaction 0
-      set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
-      set my-employer this-employer
-      ask this-employer [
-        set my-employees fput myself my-employees ; Add this employee to the employer's list
-        set size length my-employees / 10
-      ]
-    ]
-    set employer-index employer-index + 1
-  ]
 
-  ; Layout employers by size.
-;  let sorted-employers reverse sort-on [length my-employees] employers
-;  let sorted-employers-agentset (turtle-set sorted-employers)
-;  ask sorted-employers-agentset [
-;    let i who / size
-;    let j (who + 1) mod size
-;    setxy (-14 + (j * 9)) (14 - (i * 9))
-;  ]
+  create-employees total-employees [
+    set shape "person business"
+    set color random color
+    set salary random-normal 50000 25000
+    set pref-salary random-normal 50000 25000
+    set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
+    set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
+    set job-satisfaction 0
+    set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
 
-  ; Move employees to their employers.
-  ask employees [
-    move-to my-employer
+    ; Position the employee in the bottom half
+    let x-pos random-xcor
+    let y-pos random (min-pycor / 2)
+    setxy x-pos y-pos
   ]
 
   reset-ticks
-end
-
-; Initialise the global variables to appropriate values.
-to setup-globals
-  set grid-x-inc world-width / ceiling sqrt num-employers
-  set grid-y-inc world-height / ceiling sqrt num-employers
-end
-
-; Make the patches have appropriate colors.
-to setup-patches
-  ; Initialise the patch-owned variables and color the patches to a base-color.
-  ask patches
-  [
-    set my-row -1
-    set my-column -1
-    set pcolor brown + 3
-  ]
-
-  ; Initialise the global variables that hold patch agentsets.
-  set roads patches with
-    [(floor((pxcor + max-pxcor - floor(grid-x-inc - 1)) mod grid-x-inc) = 0) or
-    (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
-
-  ask roads [ set pcolor white ]
 end
 
 ; Go routine.
@@ -200,9 +165,9 @@ end
 @#$#@#$#@
 GRAPHICS-WINDOW
 538
-8
-879
-350
+10
+1014
+488
 -1
 -1
 9.0
@@ -212,13 +177,13 @@ GRAPHICS-WINDOW
 1
 1
 0
-0
-0
 1
--18
-18
--18
-18
+1
+1
+-25
+25
+-25
+25
 0
 0
 1
@@ -273,10 +238,10 @@ NIL
 1
 
 BUTTON
-76
-7
-140
-41
+78
+10
+142
+44
 Step
 go
 NIL
