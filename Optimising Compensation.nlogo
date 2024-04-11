@@ -44,7 +44,7 @@ to setup
   resize-world (-1 * custom-world-width / 2) (custom-world-width / 2) (-1 * custom-world-height / 2) (custom-world-height / 2)
 
   ; Create employers and position them in a grid in the top half
-  let employer-spacing (max-pycor / 2) / ceiling (sqrt num-employers)
+  let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
   let employer-num 0
   create-employers num-employers [
     set shape "circle 2"
@@ -58,8 +58,8 @@ to setup
     ; Position the employer in a grid in the top half
     let row floor (employer-num / ceiling (sqrt num-employers))
     let col employer-num mod ceiling (sqrt num-employers)
-    let x-pos (col * employer-spacing) - (max-pxcor / 2) + (employer-spacing / 2)
-    let y-pos (max-pycor / 2) - (row * employer-spacing) - (employer-spacing / 2)
+    let x-pos (col * employer-spacing) + min-pxcor + (employer-spacing / 2)
+    let y-pos max-pycor - (row * employer-spacing) - (employer-spacing / 2)
     setxy x-pos y-pos
 
     set employer-num employer-num + 1
@@ -79,7 +79,7 @@ to setup
 
     ; Position the employee in the bottom half
     let x-pos random-xcor
-    let y-pos random (min-pycor / 2)
+    let y-pos random (min-pycor / 2) - 13
     setxy x-pos y-pos
   ]
 
@@ -177,8 +177,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -25
 25
@@ -214,7 +214,7 @@ num-employers
 num-employers
 0
 50
-10.0
+50.0
 1
 1
 NIL
