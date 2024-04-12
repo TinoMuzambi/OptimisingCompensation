@@ -78,7 +78,7 @@ to setup
 
     ; Position the employee in the bottom half
     let x-pos random-xcor
-    let y-pos random (min-pycor / 2) - 13
+    let y-pos random (min-pycor / 2) - (ceiling total-employees / 16)
     setxy x-pos y-pos
   ]
 
@@ -188,7 +188,7 @@ GRAPHICS-WINDOW
 538
 10
 1014
-488
+487
 -1
 -1
 9.0
@@ -235,7 +235,7 @@ num-employers
 num-employers
 0
 50
-12.0
+15.0
 1
 1
 NIL
