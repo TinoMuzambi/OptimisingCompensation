@@ -2,7 +2,8 @@
 
 ; Define global variables.
 globals [
-
+  successful-job-changes
+  successful-negotiations
 ]
 
 ; Define agents.
@@ -35,6 +36,9 @@ patches-own [
 ; Set up routine.
 to setup
   clear-all
+
+  set successful-job-changes 0
+  set successful-negotiations 0
 
   ; Set the dimensions of the world
   let custom-world-width total-employees / 4
@@ -101,7 +105,7 @@ to go
         if-else application-outcome > 0.5 [                    ; Application successful.
           seek-job
         ] [
-         negotiate
+          negotiate                                ; Application unsuccessful
         ]
       ]
     ]
@@ -139,6 +143,7 @@ end
 
 to seek-job
   if any? employers with [num-jobs-available > 0] [
+    set successful-job-changes successful-job-changes + 1
     let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
     let old-employer my-employer
 
@@ -173,6 +178,7 @@ to negotiate
 
   if negotiation-outcome > 0.5 [                       ; Negotiation successful.
     set salary  max (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary.
+    set successful-negotiations successful-negotiations + 1
   ]
 
   eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
@@ -182,6 +188,14 @@ end
 
 to-report sum-num-jobs-available
   report sum [num-jobs-available] of employers
+end
+
+to-report total-successful-job-changes
+  report successful-job-changes
+end
+
+to-report total-successful-negotiations
+  report successful-negotiations
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -347,6 +361,46 @@ MONITOR
 210
 Number of Job Openings
 sum-num-jobs-available
+17
+1
+11
+
+PLOT
+324
+250
+524
+400
+Number of Job Openings
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [num-jobs-available] of employers"
+
+MONITOR
+330
+441
+489
+486
+Successful Job Changes
+successful-job-changes
+0
+1
+11
+
+MONITOR
+340
+517
+501
+562
+Successful Negotiations
+successful-negotiations
 17
 1
 11
