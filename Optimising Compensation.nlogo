@@ -51,7 +51,7 @@ to setup
     set color yellow
     set capacity (random 96) + 5
     set num-jobs-available 0
-    set workforce-needs random 20
+    set workforce-needs random capacity
     set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
     set size 1
@@ -159,7 +159,7 @@ to seek-job
     if-else salary = 0 [
      set salary random-normal 50000 25000
     ] [
-      set salary salary * (1 + salary-increase-changing-jobs) ; Update my salary.
+      set salary max (list (salary * (1 + salary-increase-changing-jobs)) 10000000) ; Update my salary.
     ]
     set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
     move-to new-employer
@@ -172,7 +172,7 @@ to negotiate
   let negotiation-outcome random-float 1               ; Simulate negotiation process.
 
   if negotiation-outcome > 0.5 [                       ; Negotiation successful.
-    set salary salary * (1 + annual-salary-increase)    ; Update my salary.
+    set salary  max (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary.
   ]
 
   eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
@@ -187,8 +187,8 @@ end
 GRAPHICS-WINDOW
 538
 10
-1014
-487
+1005
+478
 -1
 -1
 9.0
