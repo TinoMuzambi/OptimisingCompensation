@@ -40,13 +40,6 @@ to setup
   set successful-job-changes 0
   set successful-negotiations 0
 
-  ; Set the dimensions of the world
-  let custom-world-width total-employees / 4
-  let custom-world-height total-employees / 4
-
-  ; Resize the world
-  resize-world (-1 * custom-world-width / 2) (custom-world-width / 2) (-1 * custom-world-height / 2) (custom-world-height / 2)
-
   ; Create employers and position them in a grid in the top half
   let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
   let employer-num 0
@@ -82,7 +75,7 @@ to setup
 
     ; Position the employee in the bottom half
     let x-pos random-xcor
-    let y-pos random (min-pycor / 2) - (ceiling total-employees / 16)
+    let y-pos random min-pycor
     setxy x-pos y-pos
   ]
 
@@ -201,8 +194,8 @@ end
 GRAPHICS-WINDOW
 538
 10
-1005
-478
+987
+460
 -1
 -1
 9.0
@@ -215,12 +208,12 @@ GRAPHICS-WINDOW
 0
 0
 1
--25
-25
--25
-25
-0
-0
+-24
+24
+-24
+24
+1
+1
 1
 ticks
 30.0
@@ -234,7 +227,7 @@ total-employees
 total-employees
 0
 500
-202.0
+481.0
 1
 1
 NIL
@@ -249,7 +242,7 @@ num-employers
 num-employers
 0
 50
-15.0
+10.0
 1
 1
 NIL
@@ -290,10 +283,10 @@ NIL
 1
 
 BUTTON
-145
-9
-209
-43
+147
+10
+211
+44
 Go
 go
 T
@@ -356,9 +349,9 @@ PENS
 
 MONITOR
 328
-165
+327
 493
-210
+372
 Number of Job Openings
 sum-num-jobs-available
 17
@@ -366,10 +359,10 @@ sum-num-jobs-available
 11
 
 PLOT
-324
-250
-524
-400
+328
+168
+528
+318
 Number of Job Openings
 NIL
 NIL
@@ -384,10 +377,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [num-jobs-available] of employers"
 
 MONITOR
-330
-441
-489
-486
+328
+379
+487
+424
 Successful Job Changes
 successful-job-changes
 0
@@ -395,10 +388,10 @@ successful-job-changes
 11
 
 MONITOR
-340
-517
-501
-562
+327
+430
+488
+475
 Successful Negotiations
 successful-negotiations
 17
