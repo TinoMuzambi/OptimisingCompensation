@@ -57,7 +57,7 @@ to setup
     let row floor (employer-num / ceiling (sqrt num-employers))
     let col employer-num mod ceiling (sqrt num-employers)
     let x-pos (col * employer-spacing) + min-pxcor + (employer-spacing / 2)
-    let y-pos max-pycor - (row * employer-spacing) - (employer-spacing / 2)
+    let y-pos max-pycor - (row * employer-spacing) - (employer-spacing / 2) + 2
     setxy x-pos y-pos
 
     set employer-num employer-num + 1
@@ -242,7 +242,7 @@ num-employers
 num-employers
 0
 50
-10.0
+50.0
 1
 1
 NIL
