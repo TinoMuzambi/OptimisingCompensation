@@ -1,194 +1,123 @@
-; Employee Compensation Optimisation Simulation
-
-; Define global variables.
-globals [
-  successful-job-changes
-  successful-negotiations
-]
-
-; Define agents.
-breed [employers employer]
 breed [employees employee]
+breed [companies company]
 
-; Define agent attributes.
 employees-own [
-  salary                 ; Monthly salary in Rands.
-  pref-salary            ; Preferred monthly salary in Rands.
-  pref-culture           ; Preferred work culture.
-  pref-role              ; Preferred role.
-  role                   ; Current role.
-  job-satisfaction       ; Job satisfaction based on culture, role and salary.
-  my-employer            ; Current employer.
+  salary            ; current salary
+  job-tenure        ; years in current job
+  qualifications    ; value representing skill/experience level
 ]
 
-employers-own [
-  culture                ; Work culture.
-  num-jobs-available     ; Number of job openings currently available.
-  workforce-needs        ; Number of employees needed to fulfil company needs.
-  capacity               ; Total number of employees company can have.
-  my-employees           ; Agentset of employees.
+companies-own [
+  salary-range      ; [min-salary max-salary]
+  hiring?           ; true if hiring, false otherwise
+  num-vacancies     ; number of open positions
 ]
 
-patches-own [
-
-]
-
-; Set up routine.
 to setup
   clear-all
-
-  set successful-job-changes 0
-  set successful-negotiations 0
-
-  ; Create employers and position them in a grid in the top half
-  let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
-  let employer-num 0
-  create-employers num-employers [
-    set shape "circle 2"
-    set color yellow
-    set capacity (random 96) + 5
-    set num-jobs-available 0
-    set workforce-needs random capacity
-    set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
-    set my-employees []
-    set size 1
-
-    ; Position the employer in a grid in the top half
-    let row floor (employer-num / ceiling (sqrt num-employers))
-    let col employer-num mod ceiling (sqrt num-employers)
-    let x-pos (col * employer-spacing) + min-pxcor + (employer-spacing / 2)
-    let y-pos max-pycor - (row * employer-spacing) - (employer-spacing / 2) + 2
-    setxy x-pos y-pos
-
-    set employer-num employer-num + 1
-  ]
-
-  ; Create and allocate employees to employers
-
-  create-employees total-employees [
-    set shape "person business"
-    set color random color
-    set pref-salary random-normal 50000 25000
-    set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
-    set job-satisfaction 0
-    set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
-
-    ; Position the employee in the bottom half
-    let x-pos random-xcor
-    let y-pos random min-pycor
-    setxy x-pos y-pos
-  ]
-
+  setup-employees
+  setup-companies
   reset-ticks
 end
 
-; Go routine.
+to setup-employees
+  create-employees total-employees [
+    setxy random-xcor random-ycor
+    set salary 30000 + random 20000  ; initial salaries between $30k and $50k
+    set job-tenure 0
+    set qualifications random 10  ; skill level from 0 to 9
+    set color green
+  ]
+end
+
+to setup-companies
+  create-companies num-employers [
+    setxy random-xcor random-ycor
+    set salary-range (list (40000 + random 40000) (80000 + random 40000))  ; min $40k, max $80k-$120k
+    set hiring? true
+    set num-vacancies random 5  ; up to 4 open positions
+    set color red
+  ]
+  set annual-salary-increase 0.03  ; 3% annual increase for non-job-changers
+  set salary-increase-changing-jobs 0.15   ; 15% premium for job-changers
+end
+
 to go
-
-  ask employers [
-    eval-workforce-needs
-  ]
-
   ask employees [
-    if-else my-employer = 0 [ ; If unemployed
-      seek-job
-    ] [
-      if job-satisfaction < 0.5 [
-        let application-outcome random-float 1                 ; Simulate application process.
-        if-else application-outcome > 0.5 [                    ; Application successful.
-          seek-job
-        ] [
-          negotiate                                ; Application unsuccessful
-        ]
-      ]
-    ]
-
+    ; decide to stay or change job based on tenure
+    ifelse job-tenure > 5 and random-float 1 < 0.2  ; 20% chance to change job after 5 years
+      [change-job]
+      [stay-in-job]
   ]
-
+  ask companies [
+    hire-employees
+    set hiring? false  ; stop hiring after filling vacancies
+  ]
   tick
 end
 
-;;;;;;;;;;;;;;;;;;;;;; EMPLOYER ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to eval-workforce-needs
-  if workforce-needs > length my-employees [
-    if length my-employees < capacity [
-      set num-jobs-available workforce-needs - length my-employees
-    ]
+to change-job  ; employee procedure
+  let new-job max-one-of companies with [hiring? and num-vacancies > 0] [
+    item 1 salary-range * (1 + qualifications / 20)  ; favor companies with higher max salary and weight by qualifications
   ]
-  set size length my-employees / 4
-end
-
-;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to eval-job-satisfaction
-  if-else my-employer = 0 [
-    set job-satisfaction 0
-  ] [
-    let salary-score ifelse-value (salary >= pref-salary) [0.33] [0]
-    let role-score ifelse-value (role = pref-role) [0.33] [0]
-    let culture-score ifelse-value ([culture] of my-employer = pref-culture) [0.33] [0]
-
-    set job-satisfaction salary-score + role-score + culture-score
+  if new-job != nobody [
+    face new-job
+    let new-salary item 1 [salary-range] of new-job * (1 + salary-increase-changing-jobs)  ; get new salary with job-change premium
+    set salary new-salary
+    move-to new-job
+    ask new-job [
+      set num-vacancies num-vacancies - 1
+      set hiring? num-vacancies > 0  ; continue hiring if vacancies remain
+    ]
+    set job-tenure 0
   ]
 end
 
+to stay-in-job  ; employee procedure
+  set salary salary * (1 + annual-salary-increase)  ; apply annual increase
+  set job-tenure job-tenure + 1
+end
 
-to seek-job
-  if any? employers with [num-jobs-available > 0] [
-    set successful-job-changes successful-job-changes + 1
-    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
-    let old-employer my-employer
-
-
-    set my-employer new-employer                         ; Update my employer.
-    ask new-employer [                                   ; Update new employer details.
-      set num-jobs-available num-jobs-available - 1
-      set my-employees fput myself my-employees
-      set size length my-employees / 10
+to hire-employees  ; company procedure
+  if num-vacancies > 0 [
+    let candidates employees in-radius 1 with [job-tenure = 0]
+    if any? candidates [
+      hire-employee max-one-of candidates [qualifications]  ; hire most qualified candidate nearby
     ]
-    if old-employer != 0 [
-      ask old-employer [                                   ; Update old employer details.
-        set num-jobs-available num-jobs-available + 1
-        set my-employees remove myself my-employees
-      ]
-    ]
-
-    if-else salary = 0 [
-     set salary random-normal 50000 25000
-    ] [
-      set salary max (list (salary * (1 + salary-increase-changing-jobs)) 10000000) ; Update my salary.
-    ]
-    set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
-    move-to new-employer
   ]
-
-  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
 end
 
-to negotiate
-  let negotiation-outcome random-float 1               ; Simulate negotiation process.
-
-  if negotiation-outcome > 0.5 [                       ; Negotiation successful.
-    set salary  max (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary.
-    set successful-negotiations successful-negotiations + 1
+to hire-employee [candidate]  ; company procedure
+  let min-salary item 0 salary-range
+  let max-salary item 1 salary-range
+  let new-salary min-salary + random (max-salary - min-salary)  ; randomize salary within range
+  ask candidate [
+    set salary new-salary
+    set job-tenure 0
+    move-to myself
   ]
-
-  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
+  set num-vacancies num-vacancies - 1
+  set hiring? num-vacancies > 0
 end
 
-;;;;;;;;;;;;;;;;;;;;;;;;; REPORTERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to-report sum-num-jobs-available
-  report sum [num-jobs-available] of employers
+to-report avg-salary-job-changers
+  let job-changers employees with [job-tenure = 0]
+  ifelse any? job-changers
+    [report mean [salary] of job-changers]
+    [report 0]
 end
 
-to-report total-successful-job-changes
-  report successful-job-changes
+to-report avg-salary-non-job-changers
+  let non-job-changers employees with [job-tenure > 0]
+  ifelse any? non-job-changers
+    [report mean [salary] of non-job-changers]
+    [report 0]
 end
 
-to-report total-successful-negotiations
-  report successful-negotiations
+to-report job-openings
+  ask companies [
+    sum num-vacancies
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -227,7 +156,7 @@ total-employees
 total-employees
 0
 500
-481.0
+203.0
 1
 1
 NIL
@@ -242,7 +171,7 @@ num-employers
 num-employers
 0
 50
-50.0
+9.0
 1
 1
 NIL
@@ -329,24 +258,6 @@ salary-increase-changing-jobs
 NIL
 HORIZONTAL
 
-PLOT
-328
-9
-528
-159
-Job Satisfaction
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [job-satisfaction] of employees"
-
 MONITOR
 328
 327
@@ -358,31 +269,13 @@ sum-num-jobs-available
 1
 11
 
-PLOT
-328
-168
-528
-318
-Number of Job Openings
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot sum [num-jobs-available] of employers"
-
 MONITOR
 328
 379
-487
+518
 424
-Successful Job Changes
-successful-job-changes
+Job Changers Average Salary
+avg-salary-job-changers
 0
 1
 11
@@ -390,10 +283,10 @@ successful-job-changes
 MONITOR
 327
 430
-488
+546
 475
-Successful Negotiations
-successful-negotiations
+Non Job Changers Average Salary
+avg-salary-non-job-changers
 17
 1
 11
