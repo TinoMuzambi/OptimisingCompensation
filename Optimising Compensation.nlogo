@@ -19,6 +19,7 @@ employees-own [
   role                   ; Current role.
   job-satisfaction       ; Job satisfaction based on culture, role and salary.
   my-employer            ; Current employer.
+  tenure                 ; Time spent with current employer.
 ]
 
 employers-own [
@@ -72,6 +73,7 @@ to setup
     set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
     set job-satisfaction 0
     set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
+    set tenure 0
 
     ; Position the employee in the bottom half
     let x-pos random-xcor
@@ -98,11 +100,12 @@ to go
         if-else application-outcome > 0.5 [                    ; Application successful.
           seek-job
         ] [
-          negotiate                                ; Application unsuccessful
+          negotiate                                            ; Application unsuccessful
+          set tenure tenure + 1
         ]
       ]
     ]
-
+    set salary salary - (inflation * salary)              ; Apply inflation
   ]
 
   tick
@@ -161,6 +164,7 @@ to seek-job
     ]
     set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
     move-to new-employer
+    set tenure 0
   ]
 
   eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
@@ -227,7 +231,7 @@ total-employees
 total-employees
 0
 500
-481.0
+206.0
 1
 1
 NIL
@@ -242,7 +246,7 @@ num-employers
 num-employers
 0
 50
-50.0
+11.0
 1
 1
 NIL
@@ -397,6 +401,39 @@ successful-negotiations
 17
 1
 11
+
+SLIDER
+5
+193
+177
+226
+inflation
+inflation
+0
+1
+0.06
+0.01
+1
+NIL
+HORIZONTAL
+
+PLOT
+1019
+39
+1219
+189
+Job Changers Salary
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [salary] of employees with [tenure < 5]"
 
 @#$#@#$#@
 ## WHAT IS IT?
