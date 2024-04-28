@@ -41,7 +41,7 @@ to setup
   set successful-job-changes 0
   set successful-negotiations 0
 
-  ; Create employers and position them in a grid in the top half
+  ; Create employers and position them in a grid in the top half.
   let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
   let employer-num 0
   create-employers num-employers [
@@ -64,11 +64,11 @@ to setup
     set employer-num employer-num + 1
   ]
 
-  ; Create and allocate employees to employers
-
+  ; Create employees and position them in a grid in the bottom half.
   create-employees total-employees [
     set shape "person business"
     set color random color
+    set salary 0
     set pref-salary random-normal 50000 25000
     set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
     set job-satisfaction 0
@@ -92,20 +92,20 @@ to go
   ]
 
   ask employees [
-    if-else my-employer = 0 [ ; If unemployed
+    if-else my-employer = 0 [                             ; If unemployed.
       seek-job
     ] [
       if job-satisfaction < 0.5 [
-        let application-outcome random-float 1                 ; Simulate application process.
-        if-else application-outcome > 0.5 [                    ; Application successful.
+        let application-outcome random-float 1            ; Simulate application process.
+        if-else application-outcome > 0.5 [               ; Application successful.
           seek-job
         ] [
-          negotiate                                            ; Application unsuccessful
-          set tenure tenure + 1
+          negotiate                                       ; Application unsuccessful.
         ]
       ]
     ]
     set salary salary - (inflation * salary)              ; Apply inflation
+    eval-job-satisfaction                                 ; Re-evaluate job satisfaction.
   ]
 
   tick
@@ -148,10 +148,10 @@ to seek-job
     ask new-employer [                                   ; Update new employer details.
       set num-jobs-available num-jobs-available - 1
       set my-employees fput myself my-employees
-      set size length my-employees / 10
+      set size length my-employees / 4
     ]
     if old-employer != 0 [
-      ask old-employer [                                   ; Update old employer details.
+      ask old-employer [                                 ; Update old employer details.
         set num-jobs-available num-jobs-available + 1
         set my-employees remove myself my-employees
       ]
@@ -160,25 +160,22 @@ to seek-job
     if-else salary = 0 [
      set salary random-normal 50000 25000
     ] [
-      set salary max (list (salary * (1 + salary-increase-changing-jobs)) 10000000) ; Update my salary.
+      set salary max (list (salary * (1 + salary-increase-changing-jobs)) 10000000)           ; Update my salary, max of 10 million.
     ]
     set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
     move-to new-employer
-    set tenure 0
+    set tenure 0                                         ; Reset number of years at employer.
   ]
-
-  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
 end
 
 to negotiate
-  let negotiation-outcome random-float 1               ; Simulate negotiation process.
+  let negotiation-outcome random-float 1                 ; Simulate negotiation process.
 
-  if negotiation-outcome > 0.5 [                       ; Negotiation successful.
-    set salary  max (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary.
+  if negotiation-outcome > 0.5 [                         ; Negotiation successful.
+    set salary  max (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary, max of 10 million.
     set successful-negotiations successful-negotiations + 1
   ]
-
-  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
+  set tenure tenure + 1                                  ; Increase number of years at employer.
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;; REPORTERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -193,6 +190,14 @@ end
 
 to-report total-successful-negotiations
   report successful-negotiations
+end
+
+to-report total-salaries
+  report sum [salary] of employees
+end
+
+to-report total-employees-rep
+  report count employees
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -231,7 +236,7 @@ total-employees
 total-employees
 0
 500
-206.0
+100.0
 1
 1
 NIL
@@ -420,9 +425,9 @@ HORIZONTAL
 PLOT
 1019
 39
-1219
-189
-Job Changers Salary
+1389
+240
+Salaries
 NIL
 NIL
 0.0
@@ -430,10 +435,50 @@ NIL
 0.0
 10.0
 true
-false
+true
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot sum [salary] of employees with [tenure < 5]"
+"Job Changers" 1.0 0 -16777216 true "" "plot sum [salary] of employees with [tenure < 5]"
+
+PLOT
+1018
+251
+1390
+429
+Salaries Non-Job Changes
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Non-Job Changers" 1.0 0 -2674135 true "" "plot sum [salary] of employees with [tenure >= 5]"
+
+MONITOR
+327
+482
+484
+527
+Total Salaries
+total-salaries
+2
+1
+11
+
+MONITOR
+328
+534
+510
+579
+Total Number of Employees
+total-employees-rep
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
