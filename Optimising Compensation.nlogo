@@ -13,7 +13,6 @@ breed [employees employee]
 ; Define agent attributes.
 employees-own [
   salary                 ; Monthly salary in Rands.
-  pref-salary            ; Preferred monthly salary in Rands.
   my-employer            ; Current employer.
   tenure                 ; Time spent with current employer.
   tendency               ; Whether the employee tends to stay in the same job or change.
@@ -64,7 +63,6 @@ to setup
     set shape "person business"
     set color random color
     set salary 0
-    set pref-salary random-normal 50000 25000
     set tenure 0
     set tendency one-of ["stay" "change"]
 
@@ -331,24 +329,6 @@ salary-increase-changing-jobs
 NIL
 HORIZONTAL
 
-PLOT
-257
-10
-653
-399
-Job Satisfaction
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [job-satisfaction] of employees"
-
 MONITOR
 257
 408
@@ -391,17 +371,17 @@ inflation
 inflation
 0
 1
-0.06
+0.0
 0.01
 1
 NIL
 HORIZONTAL
 
 PLOT
-661
-11
-1398
-397
+257
+10
+994
+396
 Average Salaries
 Ticks
 Salary
@@ -417,9 +397,9 @@ PENS
 "Stayers" 1.0 0 -2674135 true "" "plot mean [salary] of employees with [tendency = \"stay\"]"
 
 MONITOR
-662
+708
 407
-808
+854
 452
 Changers Average Salary
 avg-salary-job-changers
@@ -428,9 +408,9 @@ avg-salary-job-changers
 11
 
 MONITOR
-663
+709
 457
-787
+833
 502
 Tenure < 5
 total-job-changers
@@ -439,9 +419,9 @@ total-job-changers
 11
 
 MONITOR
-812
+858
 406
-948
+994
 451
 Stayers Average Salary
 avg-salary-non-job-changers
@@ -450,9 +430,9 @@ avg-salary-non-job-changers
 11
 
 MONITOR
-790
+836
 457
-948
+994
 502
 Tenure >= 5
 total-non-job-changers
