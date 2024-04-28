@@ -77,7 +77,7 @@ to setup
     set tenure 0
     set tendency one-of ["stay" "change"]
 
-    ; Position the employee in the bottom half
+    ; Position the employee in the bottom half.
     let x-pos random-xcor
     let y-pos random min-pycor
     setxy x-pos y-pos
@@ -106,7 +106,7 @@ to go
             negotiate
           ]
         ] [
-          set min (list salary salary + (annual-salary-increase * salary) 100000000)        ; Apply annual salary increase.
+          set salary min (list (salary + (annual-salary-increase * salary)) 100000000)        ; Apply annual salary increase.
         ]
       ] [
         if-else job-satisfaction < 0.5 [
@@ -117,11 +117,11 @@ to go
               negotiate                                   ; Application unsuccessful.
             ]
         ] [
-          set min (list salary salary + (annual-salary-increase * salary) 100000000)        ; Apply annual salary increase.
+          set salary min (list (salary + (annual-salary-increase * salary)) 100000000)        ; Apply annual salary increase.
         ]
       ]
     ]
-    ;set salary salary - (inflation * salary)              ; Apply inflation
+    set salary salary - (inflation * salary)              ; Apply inflation
     eval-job-satisfaction                                 ; Re-evaluate job satisfaction.
   ]
 
@@ -357,7 +357,7 @@ salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.19
+0.15
 0.01
 1
 NIL
@@ -902,6 +902,62 @@ NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="Vary Changing Jobs Increase" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="500"/>
+    <metric>avg-salary-job-changers</metric>
+    <metric>avg-salary-non-job-changers</metric>
+    <enumeratedValueSet variable="num-employers">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-negotiation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="inflation">
+      <value value="0.06"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="total-employees">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.15"/>
+      <value value="0.2"/>
+      <value value="0.25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="annual-salary-increase">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Vary Inflation" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="500"/>
+    <metric>avg-salary-job-changers</metric>
+    <metric>avg-salary-non-job-changers</metric>
+    <enumeratedValueSet variable="num-employers">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-negotiation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="inflation">
+      <value value="0"/>
+      <value value="0.03"/>
+      <value value="0.06"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="total-employees">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="annual-salary-increase">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
