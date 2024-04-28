@@ -173,7 +173,7 @@ to seek-job
     if-else salary = 0 [
      set salary random-normal 50000 25000
     ] [
-      set salary max (list (salary * (1 + salary-increase-changing-jobs)) 10000000)           ; Update my salary, max of 10 million.
+      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 10000000)           ; Update my salary, max of 100 million.
     ]
     set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
     move-to new-employer
@@ -185,7 +185,7 @@ to negotiate
   let negotiation-outcome random-float 1                 ; Simulate negotiation process.
 
   if negotiation-outcome > 0.5 [                         ; Negotiation successful.
-    set salary  max (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary, max of 10 million.
+    set salary min (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary, max of 100 million.
     set successful-negotiations successful-negotiations + 1
   ]
   set tenure tenure + 1                                  ; Increase number of years at employer.
@@ -205,11 +205,11 @@ to-report total-successful-negotiations
   report successful-negotiations
 end
 
-to-report avg-salaries-job-changers
+to-report avg-salary-job-changers
   report mean [salary] of employees with [tendency = "change"]
 end
 
-to-report avg-salaries-non-job-changers
+to-report avg-salary-non-job-changers
   report mean [salary] of employees with [tendency = "stay"]
 end
 
@@ -222,13 +222,13 @@ to-report total-non-job-changers
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-538
-10
-987
-460
+4
+234
+248
+479
 -1
 -1
-9.0
+4.82
 1
 12
 1
@@ -251,7 +251,7 @@ ticks
 SLIDER
 5
 48
-178
+251
 81
 total-employees
 total-employees
@@ -266,7 +266,7 @@ HORIZONTAL
 SLIDER
 5
 84
-178
+251
 117
 num-employers
 num-employers
@@ -332,7 +332,7 @@ NIL
 SLIDER
 5
 120
-203
+252
 153
 annual-salary-increase
 annual-salary-increase
@@ -347,23 +347,23 @@ HORIZONTAL
 SLIDER
 5
 156
-253
+252
 189
 salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.19
+0.15
 0.01
 1
 NIL
 HORIZONTAL
 
 PLOT
-328
-9
-528
-159
+257
+10
+653
+399
 Job Satisfaction
 NIL
 NIL
@@ -378,39 +378,21 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [job-satisfaction] of employees"
 
 MONITOR
-328
-327
-493
-372
+257
+408
+457
+453
 Number of Job Openings
 sum-num-jobs-available
 17
 1
 11
 
-PLOT
-328
-168
-528
-318
-Number of Job Openings
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot sum [num-jobs-available] of employers"
-
 MONITOR
-328
-379
-487
-424
+257
+460
+457
+505
 Successful Job Changes
 successful-job-changes
 0
@@ -418,10 +400,10 @@ successful-job-changes
 11
 
 MONITOR
-327
-430
-488
-475
+256
+511
+456
+556
 Successful Negotiations
 successful-negotiations
 17
@@ -431,7 +413,7 @@ successful-negotiations
 SLIDER
 5
 193
-177
+252
 226
 inflation
 inflation
@@ -444,11 +426,11 @@ NIL
 HORIZONTAL
 
 PLOT
-1019
-39
-1389
-240
-Average Salaries - Job Changers
+661
+11
+1398
+397
+Average Salaries
 Ticks
 Salary
 0.0
@@ -459,66 +441,48 @@ true
 true
 "" ""
 PENS
-"Job Changers" 1.0 0 -16777216 true "" "plot mean [salary] of employees with [tendency = \"change\"]"
-"Non-Job Changers" 1.0 0 -2674135 true "" "plot mean [salary] of employees with [tendency = \"stay\"]"
-
-PLOT
-1018
-251
-1390
-429
-Salaries - Non-Job Changers
-Ticks
-Salary
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"Non-Job Changers" 1.0 0 -2674135 true "" "plot sum [salary] of employees with [tenure >= 5]"
+"Changers" 1.0 0 -16777216 true "" "plot mean [salary] of employees with [tendency = \"change\"]"
+"Stayers" 1.0 0 -2674135 true "" "plot mean [salary] of employees with [tendency = \"stay\"]"
 
 MONITOR
-1018
-442
-1195
-487
-Total Salaries for Job Changers
-total-salaries-job-changers
+662
+407
+808
+452
+Changers Average Salary
+avg-salary-job-changers
 2
 1
 11
 
 MONITOR
-1017
-492
-1195
-537
-Number of Job Changers
+663
+457
+787
+502
+Tenure < 5
 total-job-changers
 0
 1
 11
 
 MONITOR
-1197
-442
-1402
-487
-Total Salaries for Non-Job Changers
-total-salaries-non-job-changers
+812
+406
+948
+451
+Stayers Average Salary
+avg-salary-non-job-changers
 2
 1
 11
 
 MONITOR
-1198
-491
-1395
-536
-Number of Non-Job Changers
+790
+457
+948
+502
+Tenure >= 5
 total-non-job-changers
 0
 1
