@@ -424,7 +424,7 @@ inflation
 inflation
 0
 1
-0.1
+0.06
 0.01
 1
 NIL
@@ -435,15 +435,15 @@ PLOT
 39
 1389
 240
-Salaries
-NIL
-NIL
+Salaries - Job Changers
+Ticks
+Salary
 0.0
 10.0
 0.0
 10.0
 true
-true
+false
 "" ""
 PENS
 "Job Changers" 1.0 0 -16777216 true "" "plot sum [salary] of employees with [tenure < 5]"
@@ -453,15 +453,15 @@ PLOT
 251
 1390
 429
-Salaries Non-Job Changes
-NIL
-NIL
+Salaries - Non-Job Changers
+Ticks
+Salary
 0.0
 10.0
 0.0
 10.0
 true
-true
+false
 "" ""
 PENS
 "Non-Job Changers" 1.0 0 -2674135 true "" "plot sum [salary] of employees with [tenure >= 5]"
