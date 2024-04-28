@@ -20,6 +20,7 @@ employees-own [
   job-satisfaction       ; Job satisfaction based on culture, role and salary.
   my-employer            ; Current employer.
   tenure                 ; Time spent with current employer.
+  tendency               ; Whether the employee tends to stay in the same job or change.
 ]
 
 employers-own [
@@ -74,6 +75,7 @@ to setup
     set job-satisfaction 0
     set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set tenure 0
+    set tendency one-of ["stay" "change"]
 
     ; Position the employee in the bottom half
     let x-pos random-xcor
@@ -95,12 +97,23 @@ to go
     if-else my-employer = 0 [                             ; If unemployed.
       seek-job
     ] [
-      if job-satisfaction < 0.5 [
-        let application-outcome random-float 1            ; Simulate application process.
-        if-else application-outcome > 0.5 [               ; Application successful.
-          seek-job
-        ] [
-          negotiate                                       ; Application unsuccessful.
+      if-else tendency = "stay" [
+        if job-satisfaction < 0.5 [
+          let application-outcome random-float 1        ; Simulate application process.
+          if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [           ; Application successful.
+            seek-job
+          ] [
+            negotiate
+          ]
+        ]
+      ] [
+        if job-satisfaction < 0.5 [
+            let application-outcome random-float 1        ; Simulate application process.
+            if-else application-outcome > 0.5 [           ; Application successful.
+              seek-job
+            ] [
+              negotiate                                   ; Application unsuccessful.
+            ]
         ]
       ]
     ]
@@ -192,12 +205,12 @@ to-report total-successful-negotiations
   report successful-negotiations
 end
 
-to-report total-salaries-job-changers
-  report sum [salary] of employees with [tenure < 5]
+to-report avg-salaries-job-changers
+  report mean [salary] of employees with [tendency = "change"]
 end
 
-to-report total-salaries-non-job-changers
-  report sum [salary] of employees with [tenure >= 5]
+to-report avg-salaries-non-job-changers
+  report mean [salary] of employees with [tendency = "stay"]
 end
 
 to-report total-job-changers
@@ -340,7 +353,7 @@ salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.15
+0.19
 0.01
 1
 NIL
@@ -435,7 +448,7 @@ PLOT
 39
 1389
 240
-Salaries - Job Changers
+Average Salaries - Job Changers
 Ticks
 Salary
 0.0
@@ -443,10 +456,11 @@ Salary
 0.0
 10.0
 true
-false
+true
 "" ""
 PENS
-"Job Changers" 1.0 0 -16777216 true "" "plot sum [salary] of employees with [tenure < 5]"
+"Job Changers" 1.0 0 -16777216 true "" "plot mean [salary] of employees with [tendency = \"change\"]"
+"Non-Job Changers" 1.0 0 -2674135 true "" "plot mean [salary] of employees with [tendency = \"stay\"]"
 
 PLOT
 1018
