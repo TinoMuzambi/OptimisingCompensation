@@ -86,23 +86,22 @@ to go
     if-else my-employer = 0 [                             ; If unemployed.
       seek-job
     ] [
+      let application-outcome random-float 1              ; Simulate application process.
       if-else tendency = "stay" [
-        let application-outcome random-float 1        ; Simulate application process.
-        if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [           ; Application successful.
+        if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [  ; Application successful.
           seek-job
         ] [
-          negotiate
+          negotiate                                     ; Application unsuccessful.
         ]
       ] [
-          let application-outcome random-float 1        ; Simulate application process.
           if-else application-outcome > 0.5 [           ; Application successful.
             seek-job
           ] [
             negotiate                                   ; Application unsuccessful.
           ]
       ]
+      set salary salary - (inflation * salary)            ; Apply inflation
     ]
-    set salary salary - (inflation * salary)              ; Apply inflation
   ]
 
   tick
@@ -123,28 +122,28 @@ end
 
 to seek-job
   if any? employers with [num-jobs-available > 0] [
-    set successful-job-changes successful-job-changes + 1
-    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
+    set successful-job-changes successful-job-changes + 1           ; Increment number of job changes.
+
+    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs.
     let old-employer my-employer
+    set my-employer new-employer                                    ; Update my employer.
 
-
-    set my-employer new-employer                         ; Update my employer.
-    ask new-employer [                                   ; Update new employer details.
+    ask new-employer [                                              ; Update new employer details.
       set num-jobs-available num-jobs-available - 1
       set my-employees fput myself my-employees
       set size length my-employees / 4
     ]
     if old-employer != 0 [
-      ask old-employer [                                 ; Update old employer details.
+      ask old-employer [                                            ; Update old employer details.
         set num-jobs-available num-jobs-available + 1
         set my-employees remove myself my-employees
       ]
     ]
 
-    if-else salary = 0 [
+    if-else salary = 0 [                                            ; If unemployed, set salary from random normal distribution.
      set salary random-normal 50000 25000
     ] [
-      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 10000000)           ; Update my salary, max of 100 million.
+      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)           ; Update my salary, max of 10 million.
     ]
     move-to new-employer
     set tenure 0                                         ; Reset number of years at employer.
@@ -155,7 +154,7 @@ to negotiate
   let negotiation-outcome random-float 1                 ; Simulate negotiation process.
 
   if negotiation-outcome > 0.5 [                         ; Negotiation successful.
-    set salary min (list (salary * (1 + salary-increase-negotiation)) 100000000)    ; Update my salary, max of 100 million.
+    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)    ; Update my salary, max of 10 million.
     set successful-negotiations successful-negotiations + 1
   ]
   set tenure tenure + 1                                  ; Increase number of years at employer.
