@@ -98,26 +98,30 @@ to go
       seek-job
     ] [
       if-else tendency = "stay" [
-        if job-satisfaction < 0.5 [
+        if-else job-satisfaction < 0.5 [
           let application-outcome random-float 1        ; Simulate application process.
           if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [           ; Application successful.
             seek-job
           ] [
             negotiate
           ]
+        ] [
+          set min (list salary salary + (annual-salary-increase * salary) 100000000)        ; Apply annual salary increase.
         ]
       ] [
-        if job-satisfaction < 0.5 [
+        if-else job-satisfaction < 0.5 [
             let application-outcome random-float 1        ; Simulate application process.
             if-else application-outcome > 0.5 [           ; Application successful.
               seek-job
             ] [
               negotiate                                   ; Application unsuccessful.
             ]
+        ] [
+          set min (list salary salary + (annual-salary-increase * salary) 100000000)        ; Apply annual salary increase.
         ]
       ]
     ]
-    set salary salary - (inflation * salary)              ; Apply inflation
+    ;set salary salary - (inflation * salary)              ; Apply inflation
     eval-job-satisfaction                                 ; Re-evaluate job satisfaction.
   ]
 
@@ -185,7 +189,7 @@ to negotiate
   let negotiation-outcome random-float 1                 ; Simulate negotiation process.
 
   if negotiation-outcome > 0.5 [                         ; Negotiation successful.
-    set salary min (list (salary * (1 + annual-salary-increase)) 100000000)    ; Update my salary, max of 100 million.
+    set salary min (list (salary * (1 + salary-increase-negotiation)) 100000000)    ; Update my salary, max of 100 million.
     set successful-negotiations successful-negotiations + 1
   ]
   set tenure tenure + 1                                  ; Increase number of years at employer.
@@ -222,10 +226,10 @@ to-report total-non-job-changers
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-4
-234
-248
-479
+5
+267
+249
+512
 -1
 -1
 4.82
@@ -296,9 +300,9 @@ NIL
 1
 
 BUTTON
-78
+76
 10
-142
+140
 44
 Step
 go
@@ -313,9 +317,9 @@ NIL
 1
 
 BUTTON
-147
+145
 10
-211
+209
 44
 Go
 go
@@ -345,15 +349,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-156
-252
-189
+6
+193
+251
+226
 salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.15
+0.19
 0.01
 1
 NIL
@@ -411,10 +415,10 @@ successful-negotiations
 11
 
 SLIDER
-5
-193
+6
+230
 252
-226
+263
 inflation
 inflation
 0
@@ -487,6 +491,21 @@ total-non-job-changers
 0
 1
 11
+
+SLIDER
+6
+156
+251
+189
+salary-increase-negotiation
+salary-increase-negotiation
+0
+1
+0.1
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
