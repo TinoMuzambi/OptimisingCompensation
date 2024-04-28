@@ -32,7 +32,7 @@ to setup
 
   set successful-job-changes 0
   set successful-negotiations 0
-  set initial-salary salary random-normal 50000 25000
+  set initial-salary random-normal 50000 25000
 
   ; Create employers and position them in a grid in the top half.
   let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
@@ -374,7 +374,7 @@ inflation
 inflation
 0
 1
-0.0
+0.06
 0.01
 1
 NIL
@@ -854,10 +854,10 @@ NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="Vary Changing Jobs Increase" repetitions="5" runMetricsEveryStep="true">
+  <experiment name="Vary Changing Jobs Increase" repetitions="10" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
-    <timeLimit steps="500"/>
+    <timeLimit steps="1000"/>
     <metric>avg-salary-job-changers</metric>
     <metric>avg-salary-non-job-changers</metric>
     <enumeratedValueSet variable="num-employers">
@@ -873,18 +873,20 @@ NetLogo 6.4.0
       <value value="100"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.1"/>
       <value value="0.15"/>
       <value value="0.2"/>
       <value value="0.25"/>
+      <value value="0.3"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="annual-salary-increase">
       <value value="0.05"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="Vary Inflation" repetitions="5" runMetricsEveryStep="true">
+  <experiment name="Vary Inflation" repetitions="10" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
-    <timeLimit steps="500"/>
+    <timeLimit steps="1000"/>
     <metric>avg-salary-job-changers</metric>
     <metric>avg-salary-non-job-changers</metric>
     <enumeratedValueSet variable="num-employers">
@@ -895,7 +897,38 @@ NetLogo 6.4.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="inflation">
       <value value="0"/>
-      <value value="0.03"/>
+      <value value="0.02"/>
+      <value value="0.04"/>
+      <value value="0.06"/>
+      <value value="0.08"/>
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="total-employees">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="annual-salary-increase">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Vary Number of Employers" repetitions="10" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="1000"/>
+    <metric>avg-salary-job-changers</metric>
+    <metric>avg-salary-non-job-changers</metric>
+    <enumeratedValueSet variable="num-employers">
+      <value value="5"/>
+      <value value="10"/>
+      <value value="15"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-negotiation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="inflation">
       <value value="0.06"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="total-employees">
