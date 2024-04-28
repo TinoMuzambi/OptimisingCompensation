@@ -4,6 +4,7 @@
 globals [
   successful-job-changes
   successful-negotiations
+  initial-salary
 ]
 
 ; Define agents.
@@ -31,6 +32,7 @@ to setup
 
   set successful-job-changes 0
   set successful-negotiations 0
+  set initial-salary salary random-normal 50000 25000
 
   ; Create employers and position them in a grid in the top half.
   let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
@@ -137,7 +139,7 @@ to seek-job
     ]
 
     if-else salary = 0 [                                            ; If unemployed, set salary from random normal distribution.
-     set salary random-normal 50000 25000
+     set salary initial-salary
     ] [
       set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)    ; Update salary, max of 10 million.
     ]
