@@ -192,12 +192,20 @@ to-report total-successful-negotiations
   report successful-negotiations
 end
 
-to-report total-salaries
-  report sum [salary] of employees
+to-report total-salaries-job-changers
+  report sum [salary] of employees with [tenure < 5]
 end
 
-to-report total-employees-rep
-  report count employees
+to-report total-salaries-non-job-changers
+  report sum [salary] of employees with [tenure >= 5]
+end
+
+to-report total-job-changers
+  report count employees with [tenure < 5]
+end
+
+to-report total-non-job-changers
+  report count employees with [tenure >= 5]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -251,7 +259,7 @@ num-employers
 num-employers
 0
 50
-11.0
+10.0
 1
 1
 NIL
@@ -416,7 +424,7 @@ inflation
 inflation
 0
 1
-0.06
+0.1
 0.01
 1
 NIL
@@ -459,24 +467,46 @@ PENS
 "Non-Job Changers" 1.0 0 -2674135 true "" "plot sum [salary] of employees with [tenure >= 5]"
 
 MONITOR
-327
-482
-484
-527
-Total Salaries
-total-salaries
+1018
+442
+1195
+487
+Total Salaries for Job Changers
+total-salaries-job-changers
 2
 1
 11
 
 MONITOR
-328
-534
-510
-579
-Total Number of Employees
-total-employees-rep
-17
+1017
+492
+1195
+537
+Number of Job Changers
+total-job-changers
+0
+1
+11
+
+MONITOR
+1197
+442
+1402
+487
+Total Salaries for Non-Job Changers
+total-salaries-non-job-changers
+2
+1
+11
+
+MONITOR
+1198
+491
+1395
+536
+Number of Non-Job Changers
+total-non-job-changers
+0
 1
 11
 
