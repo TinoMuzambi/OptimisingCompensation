@@ -14,17 +14,12 @@ breed [employees employee]
 employees-own [
   salary                 ; Monthly salary in Rands.
   pref-salary            ; Preferred monthly salary in Rands.
-  pref-culture           ; Preferred work culture.
-  pref-role              ; Preferred role.
-  role                   ; Current role.
-  job-satisfaction       ; Job satisfaction based on culture, role and salary.
   my-employer            ; Current employer.
   tenure                 ; Time spent with current employer.
   tendency               ; Whether the employee tends to stay in the same job or change.
 ]
 
 employers-own [
-  culture                ; Work culture.
   num-jobs-available     ; Number of job openings currently available.
   workforce-needs        ; Number of employees needed to fulfil company needs.
   capacity               ; Total number of employees company can have.
@@ -51,7 +46,6 @@ to setup
     set capacity (random 96) + 5
     set num-jobs-available 0
     set workforce-needs random capacity
-    set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
     set size 1
 
@@ -71,9 +65,6 @@ to setup
     set color random color
     set salary 0
     set pref-salary random-normal 50000 25000
-    set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
-    set job-satisfaction 0
-    set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set tenure 0
     set tendency one-of ["stay" "change"]
 
@@ -98,31 +89,22 @@ to go
       seek-job
     ] [
       if-else tendency = "stay" [
-        if-else job-satisfaction < 0.5 [
-          let application-outcome random-float 1        ; Simulate application process.
-          if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [           ; Application successful.
-            seek-job
-          ] [
-            negotiate
-          ]
+        let application-outcome random-float 1        ; Simulate application process.
+        if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [           ; Application successful.
+          seek-job
         ] [
-          set salary min (list (salary + (annual-salary-increase * salary)) 100000000)        ; Apply annual salary increase.
+          negotiate
         ]
       ] [
-        if-else job-satisfaction < 0.5 [
-            let application-outcome random-float 1        ; Simulate application process.
-            if-else application-outcome > 0.5 [           ; Application successful.
-              seek-job
-            ] [
-              negotiate                                   ; Application unsuccessful.
-            ]
-        ] [
-          set salary min (list (salary + (annual-salary-increase * salary)) 100000000)        ; Apply annual salary increase.
-        ]
+          let application-outcome random-float 1        ; Simulate application process.
+          if-else application-outcome > 0.5 [           ; Application successful.
+            seek-job
+          ] [
+            negotiate                                   ; Application unsuccessful.
+          ]
       ]
     ]
     set salary salary - (inflation * salary)              ; Apply inflation
-    eval-job-satisfaction                                 ; Re-evaluate job satisfaction.
   ]
 
   tick
@@ -140,19 +122,6 @@ to eval-workforce-needs
 end
 
 ;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to eval-job-satisfaction
-  if-else my-employer = 0 [
-    set job-satisfaction 0
-  ] [
-    let salary-score ifelse-value (salary >= pref-salary) [0.33] [0]
-    let role-score ifelse-value (role = pref-role) [0.33] [0]
-    let culture-score ifelse-value ([culture] of my-employer = pref-culture) [0.33] [0]
-
-    set job-satisfaction salary-score + role-score + culture-score
-  ]
-end
-
 
 to seek-job
   if any? employers with [num-jobs-available > 0] [
@@ -179,7 +148,6 @@ to seek-job
     ] [
       set salary min (list (salary * (1 + salary-increase-changing-jobs)) 10000000)           ; Update my salary, max of 100 million.
     ]
-    set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
     move-to new-employer
     set tenure 0                                         ; Reset number of years at employer.
   ]
