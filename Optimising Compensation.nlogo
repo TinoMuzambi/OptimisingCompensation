@@ -100,7 +100,7 @@ to go
             negotiate                                   ; Application unsuccessful.
           ]
       ]
-      set salary salary - (inflation * salary)            ; Apply inflation
+      set salary max (list (salary * (1 - inflation)) 0)      ; Apply inflation, min 0.
     ]
   ]
 
