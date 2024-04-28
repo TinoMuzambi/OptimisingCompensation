@@ -25,10 +25,6 @@ employers-own [
   my-employees           ; Agentset of employees.
 ]
 
-patches-own [
-
-]
-
 ; Set up routine.
 to setup
   clear-all
@@ -83,10 +79,10 @@ to go
   ]
 
   ask employees [
-    if-else my-employer = 0 [                             ; If unemployed.
+    if-else my-employer = 0 [                           ; If unemployed.
       seek-job
     ] [
-      let application-outcome random-float 1              ; Simulate application process.
+      let application-outcome random-float 1            ; Simulate application process.
       if-else tendency = "stay" [
         if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [  ; Application successful.
           seek-job
@@ -100,7 +96,7 @@ to go
             negotiate                                   ; Application unsuccessful.
           ]
       ]
-      set salary max (list (salary * (1 - inflation)) 0)      ; Apply inflation, min 0.
+      set salary max (list (salary * (1 - inflation)) 0)                              ; Apply inflation, min 0.
     ]
   ]
 
@@ -121,7 +117,7 @@ end
 ;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to seek-job
-  if any? employers with [num-jobs-available > 0] [
+  if-else any? employers with [num-jobs-available > 0] [
     set successful-job-changes successful-job-changes + 1           ; Increment number of job changes.
 
     let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs.
@@ -143,21 +139,27 @@ to seek-job
     if-else salary = 0 [                                            ; If unemployed, set salary from random normal distribution.
      set salary random-normal 50000 25000
     ] [
-      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)           ; Update my salary, max of 10 million.
+      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)    ; Update salary, max of 10 million.
     ]
-    move-to new-employer
-    set tenure 0                                         ; Reset number of years at employer.
+
+    move-to new-employer                                            ; Move to new employer and reset number of years at employer.
+    set tenure 0
+  ] [
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, max of 10 million.
   ]
 end
 
 to negotiate
-  let negotiation-outcome random-float 1                 ; Simulate negotiation process.
+  let negotiation-outcome random-float 1                            ; Simulate negotiation process.
 
-  if negotiation-outcome > 0.5 [                         ; Negotiation successful.
-    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)    ; Update my salary, max of 10 million.
-    set successful-negotiations successful-negotiations + 1
+  if-else negotiation-outcome > 0.5 [                               ; Negotiation successful.
+    set successful-negotiations successful-negotiations + 1         ; Increment number of successful negotiations.
+
+    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)       ; Update salary, max of 10 million.
+  ] [
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, max of 10 million.
   ]
-  set tenure tenure + 1                                  ; Increase number of years at employer.
+  set tenure tenure + 1                                             ; Increase number of years at employer.
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;; REPORTERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
