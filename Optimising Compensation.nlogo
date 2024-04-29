@@ -13,18 +13,18 @@ breed [employees employee]
 
 ; Define agent attributes.
 employees-own [
-  salary                 ; Monthly salary in ZAR.
-  my-employer            ; Current employer.
-  tenure                 ; Time spent with current employer.
-  tendency               ; Whether the employee tends to stay in the same job or change.
-  tipping-point          ; The point at which an employee who tends to stay will change.
+  salary                    ; Monthly salary in ZAR.
+  my-employer               ; Current employer.
+  tenure                    ; Time spent with current employer.
+  tendency                  ; Whether the employee tends to stay in the same job or change.
+  tipping-point             ; The point at which an employee who tends to stay will change.
 ]
 
 employers-own [
-  num-jobs-available     ; Number of job openings currently available.
-  workforce-needs        ; Number of employees needed to fulfil company needs.
-  capacity               ; Total number of employees company can have.
-  my-employees           ; Agentset of employees.
+  num-jobs-available        ; Number of job openings currently available.
+  workforce-needs           ; Number of employees needed to fulfil company needs.
+  capacity                  ; Total number of employees company can have.
+  my-employees              ; Agentset of employees.
 ]
 
 ; Set up routine.
@@ -332,7 +332,7 @@ salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.3
+0.15
 0.01
 1
 NIL
