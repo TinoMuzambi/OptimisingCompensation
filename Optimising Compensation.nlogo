@@ -17,6 +17,7 @@ employees-own [
   my-employer            ; Current employer.
   tenure                 ; Time spent with current employer.
   tendency               ; Whether the employee tends to stay in the same job or change.
+  tipping-point          ; The point at which an employee who tends to stay will change.
 ]
 
 employers-own [
@@ -63,6 +64,7 @@ to setup
     set salary 0
     set tenure 0
     set tendency one-of ["stay" "change"]
+    set tipping-point random-float 0.15 + 0.15
 
     ; Position the employee in the bottom half.
     let x-pos random-xcor
@@ -86,7 +88,7 @@ to go
     ] [
       let application-outcome random-float 1            ; Simulate application process.
       if-else tendency = "stay" [
-        if-else application-outcome > 0.5 and salary-increase-changing-jobs >= 0.2 [  ; Application successful.
+        if-else application-outcome > 0.5 and salary-increase-changing-jobs >= tipping-point [  ; Application successful.
           seek-job
         ] [
           negotiate                                     ; Application unsuccessful.
@@ -98,7 +100,7 @@ to go
             negotiate                                   ; Application unsuccessful.
           ]
       ]
-      set salary max (list (salary * (1 - inflation)) 0)                              ; Apply inflation, min 0.
+      set salary max (list (salary * (1 - inflation)) 0)                                        ; Apply inflation, min 0.
     ]
   ]
 
