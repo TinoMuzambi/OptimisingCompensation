@@ -2,9 +2,9 @@
 
 ; Define global variables.
 globals [
-  successful-job-changes
-  successful-negotiations
-  initial-salary
+  successful-job-changes    ; The number of successful job changes.
+  successful-negotiations   ; The number of successful negotiations.
+  initial-salary            ; The salary (ZAR) that all agents will initially start with.
 ]
 
 ; Define agents.
@@ -13,7 +13,7 @@ breed [employees employee]
 
 ; Define agent attributes.
 employees-own [
-  salary                 ; Monthly salary in Rands.
+  salary                 ; Monthly salary in ZAR.
   my-employer            ; Current employer.
   tenure                 ; Time spent with current employer.
   tendency               ; Whether the employee tends to stay in the same job or change.
@@ -31,6 +31,7 @@ employers-own [
 to setup
   clear-all
 
+  ; Initialise global variables.
   set successful-job-changes 0
   set successful-negotiations 0
   set initial-salary random-normal 50000 25000
@@ -38,22 +39,22 @@ to setup
   ; Create employers and position them in a grid in the top half.
   let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
   let employer-num 0
+
   create-employers num-employers [
     set shape "circle 2"
     set color yellow
     set capacity (random 96) + 5
-    set num-jobs-available 0
     set workforce-needs random capacity
+    set num-jobs-available 0
     set my-employees []
     set size 1
 
-    ; Position the employer in a grid in the top half
+    ; Position the employer in a grid in the top half.
     let row floor (employer-num / ceiling (sqrt num-employers))
     let col employer-num mod ceiling (sqrt num-employers)
     let x-pos (col * employer-spacing) + min-pxcor + (employer-spacing / 2)
     let y-pos max-pycor - (row * employer-spacing) - (employer-spacing / 2) + 2
     setxy x-pos y-pos
-
     set employer-num employer-num + 1
   ]
 
@@ -82,25 +83,25 @@ to go
     eval-workforce-needs
   ]
 
+  let application-outcome random-float 1.0              ; Simulate application process.
   ask employees [
-    if-else my-employer = 0 [                           ; If unemployed.
+    if-else my-employer = 0 and application-outcome > 0.5 [                                     ; If unemployed, apply for job.
       seek-job
     ] [
-      let application-outcome random-float 1            ; Simulate application process.
-      if-else tendency = "stay" [
+      if-else tendency = "stay" [                       ; If employee tends to stay, only apply for job if salary increase is greater or equal to their tipping point.
         if-else application-outcome > 0.5 and salary-increase-changing-jobs >= tipping-point [  ; Application successful.
           seek-job
         ] [
-          negotiate                                     ; Application unsuccessful.
+          negotiate                                     ; Either appplication unsuccessful or salary increase is less than tipping point, so negotiate for raise.
         ]
-      ] [
+      ] [                                               ; Else, employee tends to change so apply for job.
           if-else application-outcome > 0.5 [           ; Application successful.
             seek-job
           ] [
-            negotiate                                   ; Application unsuccessful.
+            negotiate                                   ; Application unsuccessful, so negotiate for raise.
           ]
       ]
-      set salary max (list (salary * (1 - inflation)) 0)                                        ; Apply inflation, min 0.
+      set salary max (list (salary * (1 - inflation)) 0)                                        ; Apply inflation, up to a min salary of 0.
     ]
   ]
 
@@ -110,20 +111,19 @@ end
 ;;;;;;;;;;;;;;;;;;;;;; EMPLOYER ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to eval-workforce-needs
-  if workforce-needs > length my-employees [
-    if length my-employees < capacity [
-      set num-jobs-available workforce-needs - length my-employees
+  if workforce-needs > length my-employees [                                                    ; First check if workforce needs are not being met.
+    if length my-employees < capacity [                                                         ; If so, check that capacity hasn't been exceeded.
+      set num-jobs-available workforce-needs - length my-employees                              ; Open a post.
     ]
   ]
-  set size length my-employees / 4
+
+  set size length my-employees / 4                                                              ; Update size of company, scaled down by 4 for visual display.
 end
 
 ;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to seek-job
-  if-else any? employers with [num-jobs-available > 0] [
-    set successful-job-changes successful-job-changes + 1           ; Increment number of job changes.
-
+  if-else any? employers with [num-jobs-available > 0] [            ; Check if there are jobs available.
     let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs.
     let old-employer my-employer
     set my-employer new-employer                                    ; Update my employer.
@@ -131,8 +131,8 @@ to seek-job
     ask new-employer [                                              ; Update new employer details.
       set num-jobs-available num-jobs-available - 1
       set my-employees fput myself my-employees
-      set size length my-employees / 4
     ]
+
     if old-employer != 0 [
       ask old-employer [                                            ; Update old employer details.
         set num-jobs-available num-jobs-available + 1
@@ -140,29 +140,33 @@ to seek-job
       ]
     ]
 
-    if-else salary = 0 [                                            ; If unemployed, set salary from random normal distribution.
+    if-else salary = 0 [                                            ; If unemployed, set salary to initial salary.
      set salary initial-salary
     ] [
-      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)    ; Update salary, max of 10 million.
+      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)    ; Update salary, up to a max of 10 million.
     ]
 
     move-to new-employer                                            ; Move to new employer and reset number of years at employer.
     set tenure 0
+
+    set successful-job-changes successful-job-changes + 1           ; Increment number of job changes.
   ] [
-    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, max of 10 million.
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; If no jobs available, update salary with annual increase, up to a max of 10 million.
+    set tenure tenure + 1                                                             ; Increase number of years at employer.
   ]
 end
 
 to negotiate
-  let negotiation-outcome random-float 1                            ; Simulate negotiation process.
+  let negotiation-outcome random-float 1.0                          ; Simulate negotiation process.
 
   if-else negotiation-outcome > 0.5 [                               ; Negotiation successful.
-    set successful-negotiations successful-negotiations + 1         ; Increment number of successful negotiations.
+    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)       ; Update salary, up to a max of 10 million.
 
-    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)       ; Update salary, max of 10 million.
-  ] [
-    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, max of 10 million.
+    set successful-negotiations successful-negotiations + 1         ; Increment number of successful negotiations.
+  ] [                                                               ; Negotiation unsuccessful.
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, up to a max of 10 million.
   ]
+
   set tenure tenure + 1                                             ; Increase number of years at employer.
 end
 
@@ -328,7 +332,7 @@ salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.15
+0.3
 0.01
 1
 NIL
