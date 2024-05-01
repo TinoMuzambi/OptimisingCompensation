@@ -22,7 +22,7 @@ exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>%
   # Add column for representing salary-increase.
   mutate(salary.increase = substr(salary.increase, 7, 8),
          salary.increase = as.factor(salary.increase),
-         salary.increase = recode(salary.increase, "05" = "5%", "10" = "10%", "15" = "15%", "20" = "20%", "25" = "25%")) %>% 
+         salary.increase = recode(salary.increase, "05" = "5%", "10" = "10%", "15" = "15%", "20" = "20%", "25" = "25%", "30" = "30%")) %>% 
   select(-placeholder) %>% 
   rename(changers = Changers, stayers = Stayers, ticks = Ticks)
 ```
