@@ -25,6 +25,16 @@ exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>%
          salary.increase = recode(salary.increase, "05" = "5%", "10" = "10%", "15" = "15%", "20" = "20%", "25" = "25%", "30" = "30%")) %>% 
   select(-placeholder) %>% 
   rename(changers = Changers, stayers = Stayers, ticks = Ticks)
+
+# Read in data.
+exp2 <- list.files("data/", "*inflation.csv", full.names = T) %>% 
+  read_csv(., id = "inflation") %>% 
+  # Add column for representing inflation.
+  mutate(inflation = substr(inflation, 7, 8),
+         inflation = as.factor(inflation),
+         inflation = recode(inflation, "00" = "0%", "02" = "2%", "04" = "4%", "06" = "6%", "08" = "8%", "10" = "10%")) %>% 
+  select(-placeholder) %>% 
+  rename(changers = Changers, stayers = Stayers, ticks = Ticks)
 ```
 
 # Experiment 1
