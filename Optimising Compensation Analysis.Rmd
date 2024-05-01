@@ -30,9 +30,14 @@ exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>%
 # Experiment 1
 ```{r}
 exp1.plot <- exp1 %>% 
-  ggplot(aes(ticks, changers)) +
-  geom_line(color = "red") +
-  geom_line(aes(stayers), linetype = "dashed") +
+  ggplot(aes(x = ticks)) +
+  geom_line(aes(y = changers, color = "Changers"), alpha = 0.5) +
+  geom_line(aes(y = stayers, color = "Stayers"), alpha = 0.5, linetype = "dashed") +
+  labs(title = "Varying Salary Increase from Changing Jobs",
+       x = "Ticks", y = "Salary", color = "Legend") +
+  scale_color_manual(values = c("Changers" = "red", "Stayers" = "black")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) + 
   facet_wrap(~salary.increase)
 exp1.plot
 ```
