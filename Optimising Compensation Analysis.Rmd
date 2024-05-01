@@ -16,10 +16,21 @@ library(tidyverse)
 
 # Load and clean up data
 ```{r}
-exps <- read.csv("./data/data.csv") %>% as_tibble()
+# Read in data.
+exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>% 
+  read_csv(., id = "salary.increase") %>% 
+  # Add column for representing salary-increase.
+  mutate(salary.increase = substr(salary.increase, 7, 8),
+         salary.increase = as.factor(salary.increase)) %>% 
+  select(-placeholder) %>% 
+  rename(changers = Changers, stayers = Stayers, ticks = Ticks)
+```
 
-exps <- exps %>% 
-  mutate(experiment = as.factor(experiment)) %>% 
-  mutate(winner = as.factor(winner))
+# Experiment 1
+```{r}
+exp1.plot <- exp1 %>% 
+  ggplot(aes(ticks, changers, group = salary.increase)) +
+  geom_line(aes(color = salary.increase))
+exp1.plot
 ```
 
