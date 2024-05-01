@@ -77,3 +77,18 @@ exp2.plot <- exp2 %>%
 exp2.plot
 ```
 
+# Experiment 3
+```{r}
+exp3.plot <- exp3 %>% 
+  ggplot(aes(x = ticks)) +
+  geom_line(aes(y = changers, color = "Changers"), alpha = 0.5) +
+  geom_line(aes(y = stayers, color = "Stayers"), alpha = 0.5, linetype = "dashed") +
+  labs(title = "Varying Number of Employers",
+       x = "Ticks", y = "Salary", color = "Legend") +
+  scale_color_manual(values = c("Changers" = "red", "Stayers" = "black")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  facet_wrap(~employers)
+exp3.plot
+```
+
