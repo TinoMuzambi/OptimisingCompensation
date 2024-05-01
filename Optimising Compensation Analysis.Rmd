@@ -14,7 +14,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+# Load and clean up data
+```{r}
+exps <- read.csv("./data/data.csv") %>% as_tibble()
 
-# Experiment 1
-
+exps <- exps %>% 
+  mutate(experiment = as.factor(experiment)) %>% 
+  mutate(winner = as.factor(winner))
+```
 
