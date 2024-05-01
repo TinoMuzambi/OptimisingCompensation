@@ -143,7 +143,7 @@ to seek-job
     if-else salary = 0 [                                            ; If unemployed, set salary to initial salary.
      set salary initial-salary
     ] [
-      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)    ; Update salary, up to a max of 10 million.
+      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)    ; Update salary, up to a max of 1 million.
     ]
 
     move-to new-employer                                            ; Move to new employer and reset number of years at employer.
@@ -151,7 +151,7 @@ to seek-job
 
     set successful-job-changes successful-job-changes + 1           ; Increment number of job changes.
   ] [
-    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; If no jobs available, update salary with annual increase, up to a max of 10 million.
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; If no jobs available, update salary with annual increase, up to a max of 1 million.
     set tenure tenure + 1                                                             ; Increase number of years at employer.
   ]
 end
@@ -160,11 +160,11 @@ to negotiate
   let negotiation-outcome random-float 1.0                          ; Simulate negotiation process.
 
   if-else negotiation-outcome > 0.5 [                               ; Negotiation successful.
-    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)       ; Update salary, up to a max of 10 million.
+    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)       ; Update salary, up to a max of 1 million.
 
     set successful-negotiations successful-negotiations + 1         ; Increment number of successful negotiations.
   ] [                                                               ; Negotiation unsuccessful.
-    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, up to a max of 10 million.
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, up to a max of 1 million.
   ]
 
   set tenure tenure + 1                                             ; Increase number of years at employer.
@@ -332,7 +332,7 @@ salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
 1
-0.15
+0.05
 0.01
 1
 NIL
@@ -879,11 +879,11 @@ NetLogo 6.4.0
       <value value="100"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.05"/>
       <value value="0.1"/>
       <value value="0.15"/>
       <value value="0.2"/>
       <value value="0.25"/>
-      <value value="0.3"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="annual-salary-increase">
       <value value="0.05"/>
