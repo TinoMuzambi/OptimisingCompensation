@@ -21,7 +21,8 @@ exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>%
   read_csv(., id = "salary.increase") %>% 
   # Add column for representing salary-increase.
   mutate(salary.increase = substr(salary.increase, 7, 8),
-         salary.increase = as.factor(salary.increase)) %>% 
+         salary.increase = as.factor(salary.increase),
+         salary.increase = recode(salary.increase, "05" = "5%", "10" = "10%", "15" = "15%", "20" = "20%", "25" = "25%")) %>% 
   select(-placeholder) %>% 
   rename(changers = Changers, stayers = Stayers, ticks = Ticks)
 ```
@@ -29,8 +30,10 @@ exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>%
 # Experiment 1
 ```{r}
 exp1.plot <- exp1 %>% 
-  ggplot(aes(ticks, changers, group = salary.increase)) +
-  geom_line(aes(color = salary.increase))
+  ggplot(aes(ticks, changers)) +
+  geom_line(color = "red") +
+  geom_line(aes(stayers), linetype = "dashed") +
+  facet_wrap(~salary.increase)
 exp1.plot
 ```
 
