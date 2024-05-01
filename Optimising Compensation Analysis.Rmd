@@ -1,0 +1,20 @@
+---
+title: "Optimising Compensation Analysis"
+author: "Tino Muzambi"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Libraries
+```{r}
+library(tidyverse)
+```
+
+
+# Experiment 1
+
+
