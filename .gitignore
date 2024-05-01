@@ -3,3 +3,6 @@
 .Optimising Compensation.tmp.nlogo
 *.xlsx
 *.csv
+.Rproj.user
+*.Rproj
+*.Rhistory

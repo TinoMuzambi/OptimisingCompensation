@@ -232,8 +232,8 @@ SLIDER
 48
 251
 81
-total-employees
-total-employees
+num-employees
+num-employees
 0
 500
 100.0
