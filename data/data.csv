@@ -1,0 +1,17 @@
+﻿experiment,num-employers,salary-increase-negotiation,inflation,total-employees,salary-increase-changing-jobs,annual-salary-increase,avg-salary-job-changers,avg-salary-non-job-changers,winner
+salary-increase,10,0.1,0.06,100,0.05,0.05,31931.47607,753860.7171,Stayers
+salary-increase,10,0.1,0.06,100,0.1,0.05,779321.0605,704422.4893,Changers
+salary-increase,10,0.1,0.06,100,0.15,0.05,808881.912,661908.8808,Changers
+salary-increase,10,0.1,0.06,100,0.2,0.05,913020.1395,794337.2777,Changers
+salary-increase,10,0.1,0.06,100,0.25,0.05,921203.2946,866902.235,Changers
+salary-increase,10,0.1,0.06,100,0.3,0.05,925275.9201,925160.3063,Changers
+inflation,10,0.1,0,100,0.15,0.05,1013206.011,1077011.192,Stayers
+inflation,10,0.1,0.02,100,0.15,0.05,979943.5197,1018339.513,Stayers
+inflation,10,0.1,0.04,100,0.15,0.05,939844.6294,934694.1137,Changers
+inflation,10,0.1,0.06,100,0.15,0.05,899624.0369,763473.6273,Changers
+inflation,10,0.1,0.08,100,0.15,0.05,823319.6769,4271.397049,Changers
+inflation,10,0.1,0.1,100,0.15,0.05,70798.1587,1453.431103,Changers
+num-employers,5,0.1,0.06,100,0.15,0.05,458095.4625,563971.4166,Stayers
+num-employers,10,0.1,0.06,100,0.15,0.05,891176.5855,717528.3075,Changers
+num-employers,15,0.1,0.06,100,0.15,0.05,902590.6592,789044.6812,Changers
+num-employers,20,0.1,0.06,100,0.15,0.05,884873.9998,752172.3367,Changers

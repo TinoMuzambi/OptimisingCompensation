@@ -1,3 +1,5 @@
 *.pptx
 .DS_Store
 .Optimising Compensation.tmp.nlogo
+*.Rhistory
+*.RProj.user/

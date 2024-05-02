@@ -2,10 +2,9 @@
 
 ; Define global variables.
 globals [
-  grid-x-inc    ; The amount of patches in between two roads in the x direction.
-  grid-y-inc    ; The amount of patches in between two roads in the y direction.
-
-  roads         ; Agentset containing the patches that are roads.
+  successful-job-changes    ; The number of successful job changes.
+  successful-negotiations   ; The number of successful negotiations.
+  initial-salary            ; The salary (ZAR) that all agents will initially start with.
 ]
 
 ; Define agents.
@@ -14,182 +13,161 @@ breed [employees employee]
 
 ; Define agent attributes.
 employees-own [
-  salary                 ; Monthly salary in Rands.
-  pref-salary            ; Preferred monthly salary in Rands.
-  pref-culture           ; Preferred work culture.
-  pref-role              ; Preferred role.
-  role                   ; Current role.
-  job-satisfaction       ; Job satisfaction based on culture, role and salary.
-  my-employer            ; Current employer.
+  salary                    ; Monthly salary in ZAR.
+  my-employer               ; Current employer.
+  tenure                    ; Time spent with current employer.
+  tendency                  ; Whether the employee tends to stay in the same job or change.
+  tipping-point             ; The point at which an employee who tends to stay will change.
 ]
 
 employers-own [
-  culture                ; Work culture.
-  num-jobs-available     ; Number of job openings currently available.
-  workforce-needs        ; Number of employees needed to fulfil company needs.
-  capacity               ; Total number of employees company can have.
-  my-employees           ; Agentset of employees.
-]
-
-patches-own [
-  my-row                 ; The row of the intersection counting from the upper left corner of the world.
-  my-column              ; The column of the intersection counting from the upper left corner of the world.
+  num-jobs-available        ; Number of job openings currently available.
+  workforce-needs           ; Number of employees needed to fulfil company needs.
+  capacity                  ; Total number of employees company can have.
+  my-employees              ; Agentset of employees.
 ]
 
 ; Set up routine.
 to setup
   clear-all
-  setup-globals
 
-  setup-patches
+  ; Initialise global variables.
+  set successful-job-changes 0
+  set successful-negotiations 0
+  set initial-salary random-normal 50000 25000
 
-  ; Create employers
+  ; Create employers and position them in a grid in the top half.
+  let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
+  let employer-num 0
+
   create-employers num-employers [
-    setxy random-xcor random-ycor
     set shape "circle 2"
-    set color brown
+    set color yellow
     set capacity (random 96) + 5
+    set workforce-needs random capacity
     set num-jobs-available 0
-    set workforce-needs random 100
-    set culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
     set my-employees []
+    set size 1
+
+    ; Position the employer in a grid in the top half.
+    let row floor (employer-num / ceiling (sqrt num-employers))
+    let col employer-num mod ceiling (sqrt num-employers)
+    let x-pos (col * employer-spacing) + min-pxcor + (employer-spacing / 2)
+    let y-pos max-pycor - (row * employer-spacing) - (employer-spacing / 2) + 2
+    setxy x-pos y-pos
+    set employer-num employer-num + 1
   ]
 
-  ; Create and allocate employees to employers
-  let remaining-employees total-employees
-  let employer-index 0
-  foreach sort employers [
-    this-employer ->
-    let employer-employees min (list (random remaining-employees + 10) [capacity] of this-employer)
-    set remaining-employees remaining-employees - employer-employees
-    create-employees employer-employees [
-      set shape "person business"
-      set color random color
-      set salary random-normal 50000 25000
-      set pref-salary random-normal 50000 25000
-      set pref-role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
-      set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"]
-      set job-satisfaction 0
-      set pref-culture one-of ["innovative" "traditional" "collaborative" "flexible" "customer-centric"]
-      set my-employer this-employer
-      ask this-employer [
-        set my-employees fput myself my-employees ; Add this employee to the employer's list
-        set size length my-employees / 10
-      ]
-    ]
-    set employer-index employer-index + 1
-  ]
+  ; Create employees and position them in a grid in the bottom half.
+  create-employees num-employees [
+    set shape "person business"
+    set color random color
+    set salary 0
+    set tenure 0
+    set tendency one-of ["stay" "change"]
+    set tipping-point random-float 0.15 + 0.15
 
-  ; Layout employers by size.
-;  let sorted-employers reverse sort-on [length my-employees] employers
-;  let sorted-employers-agentset (turtle-set sorted-employers)
-;  ask sorted-employers-agentset [
-;    let i who / size
-;    let j (who + 1) mod size
-;    setxy (-14 + (j * 9)) (14 - (i * 9))
-;  ]
-
-  ; Move employees to their employers.
-  ask employees [
-    move-to my-employer
+    ; Position the employee in the bottom half.
+    let x-pos random-xcor
+    let y-pos random min-pycor
+    setxy x-pos y-pos
   ]
 
   reset-ticks
 end
 
-; Initialise the global variables to appropriate values.
-to setup-globals
-  set grid-x-inc world-width / ceiling sqrt num-employers
-  set grid-y-inc world-height / ceiling sqrt num-employers
-end
-
-; Make the patches have appropriate colors.
-to setup-patches
-  ; Initialise the patch-owned variables and color the patches to a base-color.
-  ask patches
-  [
-    set my-row -1
-    set my-column -1
-    set pcolor brown + 3
-  ]
-
-  ; Initialise the global variables that hold patch agentsets.
-  set roads patches with
-    [(floor((pxcor + max-pxcor - floor(grid-x-inc - 1)) mod grid-x-inc) = 0) or
-    (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
-
-  ask roads [ set pcolor white ]
-end
-
 ; Go routine.
 to go
-
-  ask employees [
-    eval-job-satisfaction
-    if job-satisfaction < 0.5 [
-     seek-job-negotiate
-    ]
-  ]
 
   ask employers [
     eval-workforce-needs
   ]
 
-  tick
-end
-
-;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to eval-job-satisfaction
-  let salary-score ifelse-value (salary >= pref-salary) [0.33] [0]
-  let role-score ifelse-value (role = pref-role) [0.33] [0]
-  let culture-score ifelse-value ([culture] of my-employer = pref-culture) [0.33] [0]
-
-  set job-satisfaction salary-score + role-score + culture-score
-end
-
-
-to seek-job-negotiate
-  if any? employers with [num-jobs-available > 0] [
-    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs
-    let old-employer my-employer
-
-    let application-outcome random-float 1                 ; Simulate application process.
-    if-else application-outcome > 0.5 [                    ; Application successful.
-      set my-employer new-employer                         ; Update my employer.
-      ask new-employer [                                   ; Update new employer details.
-        set num-jobs-available num-jobs-available - 1
-        set my-employees fput myself my-employees
-        set size length my-employees / 10
-      ]
-      ask old-employer [                                   ; Update old employer details.
-;        set num-jobs-available num-jobs-available + 1
-        set my-employees remove myself my-employees
-      ]
-
-      set salary salary * (1 + salary-increase-changing-jobs) ; Update my salary.
-      set role one-of ["developer" "project manager" "accountant" "doctor" "lawyer" "academic"] ; Update my role.
-      move-to new-employer
+  let application-outcome random-float 1.0              ; Simulate application process.
+  ask employees [
+    if-else my-employer = 0 and application-outcome > 0.5 [                                     ; If unemployed, apply for job.
+      seek-job
     ] [
-      let negotiation-outcome random-float 1               ; Simulate negotiation process.
-
-      if negotiation-outcome > 0.5 [                       ; Negotiation successful.
-        set salary salary * (1 + annual-salary-increase)    ; Update my salary.
+      if-else tendency = "stay" [                       ; If employee tends to stay, only apply for job if salary increase is greater or equal to their tipping point.
+        if-else application-outcome > 0.5 and salary-increase-changing-jobs >= tipping-point [  ; Application successful.
+          seek-job
+        ] [
+          negotiate                                     ; Either appplication unsuccessful or salary increase is less than tipping point, so negotiate for raise.
+        ]
+      ] [                                               ; Else, employee tends to change so apply for job.
+          if-else application-outcome > 0.5 [           ; Application successful.
+            seek-job
+          ] [
+            negotiate                                   ; Application unsuccessful, so negotiate for raise.
+          ]
       ]
+      set salary max (list (salary * (1 - inflation)) 0)                                        ; Apply inflation, up to a min salary of 0.
     ]
   ]
 
-  eval-job-satisfaction                                  ; Re-evaluate job satisfaction.
+  tick
 end
 
 ;;;;;;;;;;;;;;;;;;;;;; EMPLOYER ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to eval-workforce-needs
-  if workforce-needs > length my-employees [
-    if workforce-needs < capacity [
-      set num-jobs-available num-jobs-available + 1
+  if workforce-needs > length my-employees [                                                    ; First check if workforce needs are not being met.
+    if length my-employees < capacity [                                                         ; If so, check that capacity hasn't been exceeded.
+      set num-jobs-available workforce-needs - length my-employees                              ; Open a post.
     ]
   ]
+
+  set size length my-employees / 4                                                              ; Update size of company, scaled down by 4 for visual display.
+end
+
+;;;;;;;;;;;;;;;;;;;;;; EMPLOYEE ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to seek-job
+  if-else any? employers with [num-jobs-available > 0] [            ; Check if there are jobs available.
+    let new-employer one-of employers with [num-jobs-available > 0] ; Choose one employer with available jobs.
+    let old-employer my-employer
+    set my-employer new-employer                                    ; Update my employer.
+
+    ask new-employer [                                              ; Update new employer details.
+      set num-jobs-available num-jobs-available - 1
+      set my-employees fput myself my-employees
+    ]
+
+    if old-employer != 0 [
+      ask old-employer [                                            ; Update old employer details.
+        set num-jobs-available num-jobs-available + 1
+        set my-employees remove myself my-employees
+      ]
+    ]
+
+    if-else salary = 0 [                                            ; If unemployed, set salary to initial salary.
+     set salary initial-salary
+    ] [
+      set salary min (list (salary * (1 + salary-increase-changing-jobs)) 1000000)    ; Update salary, up to a max of 1 million.
+    ]
+
+    move-to new-employer                                            ; Move to new employer and reset number of years at employer.
+    set tenure 0
+
+    set successful-job-changes successful-job-changes + 1           ; Increment number of job changes.
+  ] [
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; If no jobs available, update salary with annual increase, up to a max of 1 million.
+    set tenure tenure + 1                                                             ; Increase number of years at employer.
+  ]
+end
+
+to negotiate
+  let negotiation-outcome random-float 1.0                          ; Simulate negotiation process.
+
+  if-else negotiation-outcome > 0.5 [                               ; Negotiation successful.
+    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)       ; Update salary, up to a max of 1 million.
+
+    set successful-negotiations successful-negotiations + 1         ; Increment number of successful negotiations.
+  ] [                                                               ; Negotiation unsuccessful.
+    set salary min (list (salary * (1 + annual-salary-increase)) 1000000)             ; Update salary with annual increase, up to a max of 1 million.
+  ]
+
+  set tenure tenure + 1                                             ; Increase number of years at employer.
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;; REPORTERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -197,15 +175,39 @@ end
 to-report sum-num-jobs-available
   report sum [num-jobs-available] of employers
 end
+
+to-report total-successful-job-changes
+  report successful-job-changes
+end
+
+to-report total-successful-negotiations
+  report successful-negotiations
+end
+
+to-report avg-salary-job-changers
+  report mean [salary] of employees with [tendency = "change"]
+end
+
+to-report avg-salary-non-job-changers
+  report mean [salary] of employees with [tendency = "stay"]
+end
+
+to-report total-job-changers
+  report count employees with [tenure < 5]
+end
+
+to-report total-non-job-changers
+  report count employees with [tenure >= 5]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-538
-8
-879
-350
+5
+267
+249
+512
 -1
 -1
-9.0
+4.82
 1
 12
 1
@@ -215,12 +217,12 @@ GRAPHICS-WINDOW
 0
 0
 1
--18
-18
--18
-18
-0
-0
+-24
+24
+-24
+24
+1
+1
 1
 ticks
 30.0
@@ -228,23 +230,23 @@ ticks
 SLIDER
 5
 48
-178
+251
 81
-total-employees
-total-employees
+num-employees
+num-employees
 0
 500
-400.0
+100.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-13
-110
-186
-143
+5
+84
+251
+117
 num-employers
 num-employers
 0
@@ -256,10 +258,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-13
-33
-80
-67
+5
+9
+72
+43
 Setup
 setup
 NIL
@@ -274,9 +276,9 @@ NIL
 
 BUTTON
 76
-7
+10
 140
-41
+44
 Step
 go
 NIL
@@ -290,10 +292,10 @@ NIL
 1
 
 BUTTON
-152
-34
-216
-68
+145
+10
+209
+44
 Go
 go
 T
@@ -307,10 +309,10 @@ NIL
 1
 
 SLIDER
-13
-148
-211
-181
+5
+120
+252
+153
 annual-salary-increase
 annual-salary-increase
 0
@@ -322,10 +324,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-185
-261
-218
+6
+193
+251
+226
 salary-increase-changing-jobs
 salary-increase-changing-jobs
 0
@@ -336,34 +338,131 @@ salary-increase-changing-jobs
 NIL
 HORIZONTAL
 
-PLOT
-328
-9
-528
-159
-Job Satisfaction
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [job-satisfaction] of employees"
-
 MONITOR
-328
-165
-493
-210
+257
+408
+457
+453
 Number of Job Openings
 sum-num-jobs-available
 17
 1
 11
+
+MONITOR
+257
+460
+457
+505
+Successful Job Changes
+successful-job-changes
+0
+1
+11
+
+MONITOR
+256
+511
+456
+556
+Successful Negotiations
+successful-negotiations
+17
+1
+11
+
+SLIDER
+6
+230
+252
+263
+inflation
+inflation
+0
+1
+0.0
+0.01
+1
+NIL
+HORIZONTAL
+
+PLOT
+257
+10
+994
+396
+Average Salaries
+Ticks
+Salary
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Changers" 1.0 0 -16777216 true "" "plot mean [salary] of employees with [tendency = \"change\"]"
+"Stayers" 1.0 0 -2674135 true "" "plot mean [salary] of employees with [tendency = \"stay\"]"
+
+MONITOR
+708
+407
+854
+452
+Changers Average Salary
+avg-salary-job-changers
+2
+1
+11
+
+MONITOR
+709
+457
+833
+502
+Tenure < 5
+total-job-changers
+0
+1
+11
+
+MONITOR
+858
+406
+994
+451
+Stayers Average Salary
+avg-salary-non-job-changers
+2
+1
+11
+
+MONITOR
+836
+457
+994
+502
+Tenure >= 5
+total-non-job-changers
+0
+1
+11
+
+SLIDER
+6
+156
+251
+189
+salary-increase-negotiation
+salary-increase-negotiation
+0
+1
+0.1
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -760,6 +859,95 @@ NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="Vary Changing Jobs Increase" repetitions="10" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="1000"/>
+    <metric>avg-salary-job-changers</metric>
+    <metric>avg-salary-non-job-changers</metric>
+    <enumeratedValueSet variable="num-employers">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-negotiation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="inflation">
+      <value value="0.06"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="total-employees">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.05"/>
+      <value value="0.1"/>
+      <value value="0.15"/>
+      <value value="0.2"/>
+      <value value="0.25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="annual-salary-increase">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Vary Inflation" repetitions="10" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="1000"/>
+    <metric>avg-salary-job-changers</metric>
+    <metric>avg-salary-non-job-changers</metric>
+    <enumeratedValueSet variable="num-employers">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-negotiation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="inflation">
+      <value value="0"/>
+      <value value="0.02"/>
+      <value value="0.04"/>
+      <value value="0.06"/>
+      <value value="0.08"/>
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="total-employees">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="annual-salary-increase">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Vary Number of Employers" repetitions="10" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="1000"/>
+    <metric>avg-salary-job-changers</metric>
+    <metric>avg-salary-non-job-changers</metric>
+    <enumeratedValueSet variable="num-employers">
+      <value value="5"/>
+      <value value="10"/>
+      <value value="15"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-negotiation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="inflation">
+      <value value="0.06"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="total-employees">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="salary-increase-changing-jobs">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="annual-salary-increase">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
