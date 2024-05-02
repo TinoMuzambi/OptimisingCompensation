@@ -203,11 +203,11 @@ end
 GRAPHICS-WINDOW
 5
 267
-249
-512
+251
+514
 -1
 -1
-4.82
+4.86
 1
 12
 1
@@ -249,7 +249,7 @@ SLIDER
 117
 num-employers
 num-employers
-0
+1
 50
 10.0
 1
@@ -380,7 +380,7 @@ inflation
 inflation
 0
 1
-0.0
+0.06
 0.01
 1
 NIL
@@ -467,39 +467,59 @@ HORIZONTAL
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+This model explores the relationship between employee tenures at companies and compensation. This tests the notion that changing jobs more frequently leads to better compensation in a shorter period of time.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+This model creates a number of employers and employees. At each step, each employer evaluates its workforce needs and adjusts its number of job openings accordingly. At each step, the employees decide whether they want to stay in their job and negotiate for a promotion or if they want to apply for a new job.
+
+Employees have a tendency (stayers/changers) which influences which decision they make at each tick. Stayers have a tipping point which is a random value at which they will forego their tendency.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+- `num-employees` - The number of employees in the simulation.
+- `num-employers` - The number of employers in the simulation.
+- `annual-salary-increase` - The annual salary increase an employer will receive if un-
+successful for both applying for a job and negotiating.
+- `salary-increase-negotiation` - The salary increase that an employer receives upon a successful negotiation for a raise.
+- `salary-increase-changing-jobs` - The salary increase that an employer receives upon successfully changing jobs.
+- `inflation` - The annual inflation applied at each time step.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
+Which group performs better? Stayers or Changers?
+
+How fast does one group reach a plateau versus the other?
+
+What are the numbers of employees with Tenure < 5 compared to those >= 5?
+
+How do the numbers of successful negotiations compare with successful job changes?
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Try reducing the salary increase from changing jobs to match the annual salary increase/salary increase from negotiation to see how that affects salaries.
+
+Try reducing the number of employers/increasing the number of employees to see the effect on number of available jobs and how that relates to the salaries.
+
+Play around with the inflation to see the effects of inflation on salaries.
+
+Adjust values to match average values of other countries to see if they are consistent to South Africa.
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+Introduce age to the employees and have willingness to change jobs be a function of their age. Older people tend to not want to move around too much!
 
-## NETLOGO FEATURES
+Empower the employers more. Have different types of employers. Some that frown upon employees who move around too much. Some that want to hire more youth.
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+Introduce a job satisfaction property on the employees and track that as employees move around.
 
 ## RELATED MODELS
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+* Wilensky, U. (2011).  NetLogo Simple Economy model.  http://ccl.northwestern.edu/netlogo/models/SimpleEconomy.  Center for Connected Learning and Computer-Based Modeling, Northwestern Institute on Complex Systems, Northwestern University, Evanston, IL.
 
 ## CREDITS AND REFERENCES
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+* Muzambi, T. (2024).  Optimising Compensation model.  https://modelingcommons.org/browse/one_model/7408#model_tabs_browse_info
 @#$#@#$#@
 default
 true
