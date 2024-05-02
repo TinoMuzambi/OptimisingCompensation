@@ -1,0 +1,94 @@
+---
+title: "Optimising Compensation Analysis"
+author: "Tino Muzambi"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Libraries
+```{r}
+library(tidyverse)
+```
+
+# Load and clean up data
+```{r}
+# Read in experiment 1 data.
+exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>% 
+  read_csv(., id = "salary.increase") %>% 
+  # Add column for representing salary-increase.
+  mutate(salary.increase = substr(salary.increase, 7, 8),
+         salary.increase = as.factor(salary.increase),
+         salary.increase = recode(salary.increase, "05" = "5% Salary Increase", "10" = "10% Salary Increase", "15" = "15% Salary Increase", "20" = "20% Salary Increase", "25" = "25% Salary Increase", "30" = "30% Salary Increase")) %>% 
+  select(-placeholder) %>% 
+  rename(changers = Changers, stayers = Stayers, ticks = Ticks)
+
+# Read in experiment 2 data.
+exp2 <- list.files("data/", "*inflation.csv", full.names = T) %>% 
+  read_csv(., id = "inflation") %>% 
+  # Add column for representing inflation.
+  mutate(inflation = substr(inflation, 7, 8),
+         inflation = as.factor(inflation),
+         inflation = recode(inflation, "00" = "0% Inflation", "02" = "2% Inflation", "04" = "4% Inflation", "06" = "6% Inflation", "08" = "8% Inflation", "10" = "10% Inflation")) %>% 
+  select(-placeholder) %>% 
+  rename(changers = Changers, stayers = Stayers, ticks = Ticks)
+
+# Read in experiment 3 data.
+exp3 <- list.files("data/", "*employers", full.names = T) %>% 
+  read_csv(., id = "employers") %>% 
+  # Add column for representing employers.
+  mutate(employers = substr(employers, 7, 8),
+         employers = as.factor(employers),
+         employers = recode(employers, "05" = "5 Employers", "10" = "10 Employers", "15" = "15 Employers", "20" = "20 Employers",)) %>% 
+  select(-placeholder) %>% 
+  rename(changers = Changers, stayers = Stayers, ticks = Ticks)
+```
+
+# Experiment 1
+```{r}
+exp1.plot <- exp1 %>% 
+  ggplot(aes(x = ticks)) +
+  geom_line(aes(y = changers, color = "Changers"), alpha = 0.5) +
+  geom_line(aes(y = stayers, color = "Stayers"), alpha = 0.5, linetype = "dashed") +
+  labs(title = "Changes in Salary based on Varying Salary Increase from Changing Jobs",
+       x = "Ticks", y = "Salary (R)", color = "Legend") +
+  scale_color_manual(values = c("Changers" = "red", "Stayers" = "black")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  facet_wrap(~salary.increase)
+exp1.plot
+```
+
+# Experiment 2
+```{r}
+exp2.plot <- exp2 %>% 
+  ggplot(aes(x = ticks)) +
+  geom_line(aes(y = changers, color = "Changers"), alpha = 0.5) +
+  geom_line(aes(y = stayers, color = "Stayers"), alpha = 0.5, linetype = "dashed") +
+  labs(title = "Changes in Salary based on Varying Inflation",
+       x = "Ticks", y = "Salary (R)", color = "Legend") +
+  scale_color_manual(values = c("Changers" = "red", "Stayers" = "black")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  facet_wrap(~inflation)
+exp2.plot
+```
+
+# Experiment 3
+```{r}
+exp3.plot <- exp3 %>% 
+  ggplot(aes(x = ticks)) +
+  geom_line(aes(y = changers, color = "Changers"), alpha = 0.5) +
+  geom_line(aes(y = stayers, color = "Stayers"), alpha = 0.5, linetype = "dashed") +
+  labs(title = "Changes in Salary based on Varying Number of Employers",
+       x = "Ticks", y = "Salary (R)", color = "Legend") +
+  scale_color_manual(values = c("Changers" = "red", "Stayers" = "black")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5), panel.grid.major = element_blank()) + 
+  facet_wrap(~employers)
+exp3.plot
+```
+
