@@ -34,7 +34,7 @@ to setup
   ; Initialise global variables.
   set successful-job-changes 0
   set successful-negotiations 0
-  set initial-salary random-normal 50000 25000
+  set initial-salary max (list (random-normal 50000 25000) 0)
 
   ; Create employers and position them in a grid in the top half.
   let employer-spacing (max-pxcor - min-pxcor) / (ceiling (sqrt num-employers) + 1)
@@ -63,6 +63,7 @@ to setup
     set shape "person business"
     set color random color
     set salary 0
+    set my-employer nobody
     set tenure 0
     set tendency one-of ["stay" "change"]
     set tipping-point random-float 0.15 + 0.15
@@ -83,9 +84,9 @@ to go
     eval-workforce-needs
   ]
 
-  let application-outcome random-float 1.0              ; Simulate application process.
   ask employees [
-    if-else my-employer = 0 and application-outcome > 0.5 [                                     ; If unemployed, apply for job.
+    let application-outcome random-float 1.0            ; Simulate an independent application outcome for each employee.
+    if-else my-employer = nobody and application-outcome > 0.5 [                                ; If unemployed, apply for job.
       seek-job
     ] [
       if-else tendency = "stay" [                       ; If employee tends to stay, only apply for job if salary increase is greater or equal to their tipping point.
@@ -133,7 +134,7 @@ to seek-job
       set my-employees fput myself my-employees
     ]
 
-    if old-employer != 0 [
+    if old-employer != nobody [
       ask old-employer [                                            ; Update old employer details.
         set num-jobs-available num-jobs-available + 1
         set my-employees remove myself my-employees
@@ -160,7 +161,7 @@ to negotiate
   let negotiation-outcome random-float 1.0                          ; Simulate negotiation process.
 
   if-else negotiation-outcome > 0.5 [                               ; Negotiation successful.
-    set salary min (list (salary * (1 + salary-increase-negotiation)) 10000000)       ; Update salary, up to a max of 1 million.
+    set salary min (list (salary * (1 + salary-increase-negotiation)) 1000000)        ; Update salary, up to a max of 1 million.
 
     set successful-negotiations successful-negotiations + 1         ; Increment number of successful negotiations.
   ] [                                                               ; Negotiation unsuccessful.
