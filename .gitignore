@@ -4,3 +4,5 @@
 *.Rhistory
 *.RProj.user/
 *.pdf
+__pycache__/
+*.py[cod]
