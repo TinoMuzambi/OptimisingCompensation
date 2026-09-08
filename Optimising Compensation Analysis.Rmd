@@ -17,32 +17,32 @@ library(tidyverse)
 # Load and clean up data
 ```{r}
 # Read in experiment 1 data.
-exp1 <- list.files("data/", "*average-salaries.csv", full.names = T) %>% 
+exp1 <- list.files("data/", pattern = "average-salaries\\.csv$", full.names = TRUE) %>%
   read_csv(., id = "salary.increase") %>% 
   # Add column for representing salary-increase.
-  mutate(salary.increase = substr(salary.increase, 7, 8),
+  mutate(salary.increase = str_extract(basename(salary.increase), "^\\d{2}"),
          salary.increase = as.factor(salary.increase),
          salary.increase = recode(salary.increase, "05" = "5% Salary Increase", "10" = "10% Salary Increase", "15" = "15% Salary Increase", "20" = "20% Salary Increase", "25" = "25% Salary Increase", "30" = "30% Salary Increase")) %>% 
   select(-placeholder) %>% 
   rename(changers = Changers, stayers = Stayers, ticks = Ticks)
 
 # Read in experiment 2 data.
-exp2 <- list.files("data/", "*inflation.csv", full.names = T) %>% 
+exp2 <- list.files("data/", pattern = "inflation\\.csv$", full.names = TRUE) %>%
   read_csv(., id = "inflation") %>% 
   # Add column for representing inflation.
-  mutate(inflation = substr(inflation, 7, 8),
+  mutate(inflation = str_extract(basename(inflation), "^\\d{2}"),
          inflation = as.factor(inflation),
          inflation = recode(inflation, "00" = "0% Inflation", "02" = "2% Inflation", "04" = "4% Inflation", "06" = "6% Inflation", "08" = "8% Inflation", "10" = "10% Inflation")) %>% 
   select(-placeholder) %>% 
   rename(changers = Changers, stayers = Stayers, ticks = Ticks)
 
 # Read in experiment 3 data.
-exp3 <- list.files("data/", "*employers", full.names = T) %>% 
+exp3 <- list.files("data/", pattern = "employers\\.csv$", full.names = TRUE) %>%
   read_csv(., id = "employers") %>% 
   # Add column for representing employers.
-  mutate(employers = substr(employers, 7, 8),
+  mutate(employers = str_extract(basename(employers), "^\\d{2}"),
          employers = as.factor(employers),
-         employers = recode(employers, "05" = "5 Employers", "10" = "10 Employers", "15" = "15 Employers", "20" = "20 Employers",)) %>% 
+         employers = recode(employers, "05" = "5 Employers", "10" = "10 Employers", "15" = "15 Employers", "20" = "20 Employers")) %>%
   select(-placeholder) %>% 
   rename(changers = Changers, stayers = Stayers, ticks = Ticks)
 ```
@@ -91,4 +91,3 @@ exp3.plot <- exp3 %>%
   facet_wrap(~employers)
 exp3.plot
 ```
-
